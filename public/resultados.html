@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>AereoLink - Resultados de vuelos</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+        <script src="https://kit.fontawesome.com/6ed9f78524.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/app.css">
+    </head>
+    <body>
+        <header class="header" id="appHeader"></header>
+
+        <main class="main">
+            <div class="page-container">
+                <h2 class="page-title" id="tituloRuta">Buscando vuelos…</h2>
+                <p class="page-subtitle" id="subtituloBusqueda"></p>
+
+                <ol class="stepper" id="stepper"></ol>
+
+                <div id="seleccionPrevia"></div>
+
+                <!-- Lista de vuelos de la etapa actual -->
+                <div class="results-layout" id="vistaResultados">
+                    <details class="card filters-card" id="filtros">
+                        <summary class="filters-summary"><i class="fa-solid fa-sliders"></i> Filtros</summary>
+                        <div class="filters-body" id="filtrosCuerpo"></div>
+                    </details>
+
+                    <section class="results-main">
+                        <div class="results-toolbar">
+                            <div class="day-nav">
+                                <button type="button" class="btn btn-outline btn-sm" id="diaAnterior" aria-label="Día anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                                <label class="day-nav-date">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    <span id="diaActual"></span>
+                                    <input type="date" id="cambiarFecha" aria-label="Cambiar la fecha">
+                                </label>
+                                <button type="button" class="btn btn-outline btn-sm" id="diaSiguiente" aria-label="Día siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <label class="sort-control">
+                                <span>Ordenar por</span>
+                                <select class="control" id="orden">
+                                    <option value="precio">Menor precio</option>
+                                    <option value="duracion">Más rápido</option>
+                                    <option value="salida">Salida más temprano</option>
+                                </select>
+                            </label>
+                        </div>
+                        <p class="results-count" id="contadorResultados"></p>
+                        <div id="listaVuelos" class="flight-list"></div>
+                    </section>
+                </div>
+
+                <!-- Resumen final (ida y vuelta elegidas) -->
+                <section id="vistaResumen" hidden></section>
+            </div>
+        </main>
+
+        <script src="js/comun.js"></script>
+        <script src="js/resultados.js"></script>
+    </body>
+</html>

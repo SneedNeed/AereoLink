@@ -1,0 +1,19 @@
+{
+  "name": "aerolink",
+  "version": "1.0.0",
+  "description": "AereoLink - Agencia intermediaria de vuelos (front + servidor + PostgreSQL)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "db:init": "node scripts/init-db.js",
+    "db:demo": "node scripts/init-db.js --solo-demo"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.11.0"
+  },
+  "license": "ISC"
+}

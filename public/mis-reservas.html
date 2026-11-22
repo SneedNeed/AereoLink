@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>AereoLink - Mis reservas</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+        <script src="https://kit.fontawesome.com/6ed9f78524.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/app.css">
+    </head>
+    <body>
+        <header class="header" id="appHeader"></header>
+
+        <main class="main">
+            <div class="page-container">
+                <h2 class="page-title">Historial de vuelos</h2>
+                <p class="page-subtitle">Todas tus reservas: paga las pendientes, revisa los detalles o cancela si cambian tus planes.</p>
+
+                <div class="tabs-bar" id="filtros" role="tablist" aria-label="Filtrar reservas">
+                    <button type="button" class="tab-btn active" data-filtro="todas" role="tab">Todas <span class="tab-count" data-cuenta="todas">0</span></button>
+                    <button type="button" class="tab-btn" data-filtro="PENDIENTE" role="tab">Pendientes <span class="tab-count" data-cuenta="PENDIENTE">0</span></button>
+                    <button type="button" class="tab-btn" data-filtro="CONFIRMADA" role="tab">Confirmadas <span class="tab-count" data-cuenta="CONFIRMADA">0</span></button>
+                    <button type="button" class="tab-btn" data-filtro="cerradas" role="tab">Canceladas y expiradas <span class="tab-count" data-cuenta="cerradas">0</span></button>
+                </div>
+
+                <div id="lista" class="booking-list">
+                    <div class="skeleton skeleton-flight"></div>
+                    <div class="skeleton skeleton-flight"></div>
+                </div>
+            </div>
+        </main>
+
+        <script src="js/comun.js"></script>
+        <script src="js/mis-reservas.js"></script>
+    </body>
+</html>

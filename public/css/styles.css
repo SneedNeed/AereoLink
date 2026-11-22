@@ -1,0 +1,862 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
+
+/* ==========================================================
+   AereoLink — estilos
+   Paleta azul elegante, inspirada en buscadores tipo Despegar
+   ========================================================== */
+
+:root {
+    --navy-900: #061733;
+    --navy-800: #0a2552;
+    --blue-700: #0f3f93;
+    --blue-600: #1558c9;
+    --blue-500: #2272ea;
+    --blue-400: #4d95f5;
+    --sky-100: #e6f0fe;
+    --sky-50: #f3f7fe;
+    --page: #eef3fa;
+    --ink: #13233f;
+    --muted: #6a7b97;
+    --line: #cdd8ea;
+    --line-strong: #9fb5d9;
+    --white: #ffffff;
+
+    --radius: 12px;
+    --field-h: 64px;
+    --header-h: 72px;
+    --shadow-card: 0 24px 60px -20px rgba(6, 23, 51, 0.45);
+    --shadow-pop: 0 16px 40px -8px rgba(6, 23, 51, 0.28);
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Nunito Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--page);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, p {
+    margin: 0;
+}
+
+button, input, select {
+    font-family: inherit;
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-h);
+    padding: 0 32px;
+    color: var(--white);
+    background: linear-gradient(90deg, var(--navy-900) 0%, var(--navy-800) 60%, var(--blue-700) 100%);
+    box-shadow: 0 2px 18px rgba(6, 23, 51, 0.35);
+}
+
+.mainLogue {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mainLogue-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.main-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.headerOptions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.header-option {
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s var(--ease);
+}
+
+.header-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.header-option i {
+    font-size: 16px;
+    color: var(--blue-400);
+}
+
+.header-option-text {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.cart-option i {
+    font-size: 18px;
+    color: var(--white);
+}
+
+/* ---------- Menú de perfil ---------- */
+
+.profile-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 270px;
+    padding: 16px;
+    color: var(--ink);
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+    cursor: default;
+}
+
+/* puente invisible para que el hover no se pierda en el espacio */
+.profile-menu::before {
+    content: "";
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+}
+
+.profile-option:hover .profile-menu,
+.profile-option:focus-within .profile-menu,
+.profile-option.open .profile-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.profile-menu-title {
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--navy-800);
+    border-bottom: 1px solid var(--sky-100);
+}
+
+.profile-menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-menu-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.15s var(--ease);
+}
+
+.profile-menu-option:hover {
+    background: var(--sky-100);
+}
+
+.profile-menu-option i {
+    width: 20px;
+    text-align: center;
+    font-size: 15px;
+    color: var(--blue-600);
+}
+
+.profile-menu-option-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+
+/* ==========================================================
+   MAIN / HERO
+   ========================================================== */
+
+.main {
+    min-height: calc(100vh - var(--header-h));
+    padding: 56px 24px 80px;
+    background:
+        radial-gradient(circle at 88% -10%, rgba(77, 149, 245, 0.5), transparent 45%) top / 100% 400px no-repeat,
+        radial-gradient(circle at 5% 120%, rgba(34, 114, 234, 0.35), transparent 50%) top / 100% 400px no-repeat,
+        linear-gradient(135deg, var(--navy-800) 0%, var(--blue-600) 100%) top / 100% 400px no-repeat,
+        var(--page);
+}
+
+.welcome-text,
+.flySearcher-container {
+    width: min(100%, 1180px);
+    margin-inline: auto;
+}
+
+.welcome-text {
+    margin-bottom: 26px;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: var(--white);
+}
+
+.flySearcher-container {
+    padding: 28px 32px 32px;
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.flySearcher-title {
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--navy-800);
+}
+
+
+/* ==========================================================
+   BUSCADOR
+   ========================================================== */
+
+.flySearcher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* ---------- Tipo de vuelo ---------- */
+
+.flyOption {
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 10px 40px 10px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue-700);
+    background-color: var(--sky-50);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231558c9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.flyOption:hover {
+    border-color: var(--line-strong);
+}
+
+.flyOption:focus {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
+}
+
+/* ---------- Origen / Destino ---------- */
+
+.trayectSearcher {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.trayect-child-container {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.destiny-container {
+    margin-left: -1px;
+}
+
+.trayect-child-container:focus-within {
+    z-index: 2;
+}
+
+.trayect-input {
+    width: 100%;
+    height: var(--field-h);
+    padding: 26px 16px 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    outline: none;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.origin-container .trayect-input {
+    padding-right: 32px;
+    border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.destiny-container .trayect-input {
+    padding-left: 32px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.trayect-input:hover {
+    border-color: var(--line-strong);
+}
+
+.trayect-input:focus {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
+}
+
+/* ---------- Etiquetas flotantes ---------- */
+
+.label {
+    letter-spacing: 0.1px;
+}
+
+.trayect-label {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    z-index: 1;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition:
+        top 0.18s var(--ease),
+        transform 0.18s var(--ease),
+        font-size 0.18s var(--ease),
+        color 0.18s var(--ease);
+}
+
+.destiny-container .trayect-label {
+    left: 32px;
+}
+
+/* Etiqueta arriba cuando el campo está enfocado, o cuando tiene valor.
+   Para "tiene valor": agrega la clase .is-filled al contenedor desde JS
+   (ver ejemplo en el mensaje). */
+.trayect-child-container:focus-within .trayect-label,
+.trayect-child-container.is-filled .trayect-label {
+    top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    transform: translateY(0);
+}
+
+.trayect-child-container:focus-within .trayect-label {
+    color: var(--blue-600);
+}
+
+/* ALTERNATIVA sin JS: si le pones placeholder=" " a los inputs,
+   descomenta esto y puedes quitar la clase .is-filled:
+
+.trayect-input:not(:placeholder-shown) + .trayect-label {
+    top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    transform: translateY(0);
+}
+*/
+
+/* ---------- Botón de intercambio ---------- */
+
+.swapButton {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 40px;
+    align-self: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 -20px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    color: var(--blue-600);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(6, 23, 51, 0.12);
+    cursor: pointer;
+    transition: transform 0.3s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.swapButton:hover {
+    color: var(--white);
+    background: var(--blue-600);
+    border-color: var(--blue-600);
+    transform: rotate(180deg);
+}
+
+/* ---------- Fechas ---------- */
+
+.dateSearcher {
+    display: flex;
+    align-items: stretch;
+}
+
+.goDate-container {
+    position: relative;
+    flex: 1;
+}
+
+.goDate-container + .goDate-container {
+    margin-left: -1px;
+}
+
+.goDate-container:focus-within {
+    z-index: 2;
+}
+
+/* las fechas siempre tienen valor: la etiqueta vive arriba */
+.date-label {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    z-index: 1;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    pointer-events: none;
+    transition: color 0.18s var(--ease);
+}
+
+.goDate-container:focus-within .date-label {
+    color: var(--blue-600);
+}
+
+.goDate-container .date-form {
+    margin: 0;
+    height: 100%;
+}
+
+/* Solo ida: se oculta la fecha de vuelta */
+.dateSearcher.one-way .goDate-container:last-child {
+    display: none;
+}
+
+.dateSearcher.one-way .goDate-container:first-child input[type="date"] {
+    border-radius: var(--radius);
+}
+
+.goDate-container input[type="date"] {
+    width: 100%;
+    min-width: 172px;
+    height: var(--field-h);
+    padding: 26px 14px 8px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    color-scheme: light;
+    background: var(--white);
+    border: 1px solid var(--line);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.goDate-container:first-child input[type="date"] {
+    border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.goDate-container:last-child input[type="date"] {
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.goDate-container input[type="date"]:hover {
+    border-color: var(--line-strong);
+}
+
+.goDate-container input[type="date"]:focus {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
+}
+
+.goDate-container input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.2s var(--ease);
+}
+
+.goDate-container input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* ---------- Pasajeros ---------- */
+
+.people-chooser {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--field-h);
+    padding: 0 18px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.people-chooser:hover {
+    border-color: var(--line-strong);
+}
+
+.people-chooser:focus-within,
+.people-chooser.open {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
+}
+
+.people-chooser > i {
+    font-size: 18px;
+    color: var(--blue-600);
+}
+
+.people-number {
+    min-width: 14px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+/* flechita */
+.people-chooser::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin: -3px 0 0 4px;
+    border-right: 2px solid var(--blue-600);
+    border-bottom: 2px solid var(--blue-600);
+    transform: rotate(45deg);
+    transition: transform 0.2s var(--ease);
+}
+
+.people-chooser.open::after {
+    margin-top: 3px;
+    transform: rotate(-135deg);
+}
+
+.peopleChooser-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 50;
+    width: 330px;
+    padding: 6px 22px 22px;
+    background: var(--white);
+    border: 1px solid var(--sky-100);
+    border-radius: 16px;
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+    cursor: default;
+}
+
+/* puente invisible para el hover */
+.peopleChooser-panel::before {
+    content: "";
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+}
+
+.people-chooser.open .peopleChooser-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.person-option-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+}
+
+.person-option-container + .person-option-container {
+    border-top: 1px solid var(--sky-100);
+}
+
+.person-option-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy-800);
+}
+
+.person-option-detail {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.person-option-increment {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* en el HTML el orden es + número −; aquí se muestra − número + */
+[class*="-minus-button"] {
+    order: 1;
+}
+
+.oldPerson-number,
+.youngPerson-number {
+    order: 2;
+}
+
+[class*="-increment-button"] {
+    order: 3;
+}
+
+[class*="-minus-button"],
+[class*="-increment-button"] {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    color: var(--blue-600);
+    padding: 0;
+    background: var(--white);
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s var(--ease), color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+[class*="-minus-button"]:hover,
+[class*="-increment-button"]:hover {
+    color: var(--white);
+    background: var(--blue-600);
+    border-color: var(--blue-600);
+}
+
+.oldPerson-number,
+.youngPerson-number {
+    width: 44px;
+    height: 34px;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.oldPerson-number::-webkit-inner-spin-button,
+.oldPerson-number::-webkit-outer-spin-button,
+.youngPerson-number::-webkit-inner-spin-button,
+.youngPerson-number::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.apply-button {
+    width: 100%;
+    height: 46px;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--white);
+    background: var(--blue-600);
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s var(--ease), transform 0.1s var(--ease);
+}
+
+.apply-button:hover {
+    background: var(--blue-700);
+}
+
+.apply-button:active {
+    transform: scale(0.98);
+}
+
+/* ---------- Botón Buscar ---------- */
+
+.search-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: var(--field-h);
+    padding: 0 34px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: var(--white);
+    background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-700) 100%);
+    border: 0;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 22px -8px rgba(21, 88, 201, 0.7);
+    cursor: pointer;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease);
+}
+
+.search-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px -8px rgba(21, 88, 201, 0.8);
+    filter: brightness(1.06);
+}
+
+.search-button:active {
+    transform: translateY(0);
+}
+
+.search-button i {
+    font-size: 16px;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1100px) {
+    .flySearcher {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .trayectSearcher,
+    .dateSearcher {
+        grid-column: 1 / -1;
+    }
+
+    .goDate-container input[type="date"] {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    .header {
+        padding: 0 16px;
+    }
+
+    .support-option .header-option-text,
+    .profile-option > .header-option-text {
+        display: none;
+    }
+
+    .main {
+        padding: 36px 16px 60px;
+    }
+
+    .welcome-text {
+        font-size: 30px;
+    }
+
+    .flySearcher-container {
+        padding: 22px 18px 24px;
+        border-radius: 16px;
+    }
+
+    .flySearcher {
+        grid-template-columns: 1fr;
+    }
+
+    .trayectSearcher {
+        flex-direction: column;
+    }
+
+    .origin-container .trayect-input {
+        padding-right: 16px;
+        border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .destiny-container {
+        margin-left: 0;
+        margin-top: -1px;
+    }
+
+    .destiny-container .trayect-input {
+        padding-left: 16px;
+        border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    .destiny-container .trayect-label {
+        left: 16px;
+    }
+
+    .swapButton {
+        margin: -20px 20px -20px auto;
+        transform: rotate(90deg);
+    }
+
+    .swapButton:hover {
+        transform: rotate(270deg);
+    }
+
+    .peopleChooser-panel {
+        left: 0;
+        right: 0;
+        width: auto;
+    }
+
+    .search-button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+    }
+}

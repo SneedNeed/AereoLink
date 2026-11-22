@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>AereoLink - Datos de los pasajeros</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+        <script src="https://kit.fontawesome.com/6ed9f78524.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/auth.css">
+        <link rel="stylesheet" href="css/app.css">
+    </head>
+    <body>
+        <header class="header" id="appHeader"></header>
+
+        <main class="main">
+            <div class="page-container">
+                <h2 class="page-title">Datos de los pasajeros</h2>
+                <p class="page-subtitle">Escribe los datos tal como aparecen en el documento con el que van a viajar.</p>
+
+                <ol class="stepper">
+                    <li class="step done"><span class="step-num"><i class="fa-solid fa-check"></i></span><span class="step-text">Vuelos</span></li>
+                    <li class="step active"><span class="step-num">2</span><span class="step-text">Pasajeros</span></li>
+                    <li class="step"><span class="step-num">3</span><span class="step-text">Pago</span></li>
+                </ol>
+
+                <div id="contenido">
+                    <div class="skeleton skeleton-flight"></div>
+                </div>
+            </div>
+        </main>
+
+        <script src="js/comun.js"></script>
+        <script src="js/reservar.js"></script>
+    </body>
+</html>

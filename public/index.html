@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>AereoLink - Encuentra tu vuelo</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+        <script src="https://kit.fontawesome.com/6ed9f78524.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/app.css">
+    </head>
+    <body>
+        <header class="header" id="appHeader"></header>
+
+        <main class="main">
+            <h2 class="welcome-text">Bienvenido!</h2>
+
+            <div class="flySearcher-container">
+                <h2 class="flySearcher-title">Cuéntanos sobre tu vuelo</h2>
+
+                <form class="flySearcher" id="searchForm" novalidate>
+                    <select class="flyOption" id="tipoVuelo" name="Tipos de vuelos" aria-label="Tipo de vuelo">
+                        <option value="ida-vuelta">Ida y vuelta</option>
+                        <option value="ida">Solo ida</option>
+                    </select>
+
+                    <div class="trayectSearcher"><!--Flex-->
+                        <div class="origin-container trayect-child-container">
+                            <input class="origin-input trayect-input input" id="origen" type="text" autocomplete="off" spellcheck="false"
+                                   role="combobox" aria-autocomplete="list" aria-controls="origenLista" aria-expanded="false">
+                            <label class="label origin-title trayect-label" for="origen">Origen</label>
+                            <ul class="suggestions" id="origenLista" role="listbox" hidden></ul>
+                        </div>
+                        <button type="button" class="swapButton" id="intercambiar" aria-label="Intercambiar origen y destino">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                        </button>
+                        <div class="destiny-container trayect-child-container">
+                            <input class="destiny-input trayect-input input" id="destino" type="text" autocomplete="off" spellcheck="false"
+                                   role="combobox" aria-autocomplete="list" aria-controls="destinoLista" aria-expanded="false">
+                            <label class="label destiny-title trayect-label" for="destino">Destino</label>
+                            <ul class="suggestions" id="destinoLista" role="listbox" hidden></ul>
+                        </div>
+                    </div>
+
+                    <div class="dateSearcher">
+                        <div class="goDate-container goDate-child-container">
+                            <label class="label goDate-title date-label" for="fechaIda">Ida</label>
+                            <div class="date-form">
+                                <input type="date" id="fechaIda" name="fechaIda" required>
+                            </div>
+                        </div>
+                        <div class="goDate-container goDate-child-container">
+                            <label class="label goDate-title date-label" for="fechaVuelta">Vuelta</label>
+                            <div class="date-form">
+                                <input type="date" id="fechaVuelta" name="fechaVuelta" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="people-chooser" id="pasajeros" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Pasajeros">
+                        <i class="fa-regular fa-user"></i>
+                        <p class="people-number" id="totalPasajeros">1</p>
+                        <div class="peopleChooser-panel">
+                            <div class="person-option-container oldPerson-option-container">
+                                <div class="person-option-text">
+                                    <p class="person-option-title">Mayores</p>
+                                    <p class="person-option-detail">Desde 18 años</p>
+                                </div>
+                                <div class="person-option-increment">
+                                    <button type="button" class="oldPerson-increment-button" aria-label="Añadir un mayor"><i class="fa-solid fa-plus"></i></button>
+                                    <input class="oldPerson-number" id="adultos" type="number" value="1" min="1" max="9" aria-label="Mayores">
+                                    <button type="button" class="oldPerson-minus-button" aria-label="Quitar un mayor"><i class="fa-solid fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <div class="person-option-container youngPerson-option-container">
+                                <div class="person-option-text">
+                                    <p class="person-option-title">Menores</p>
+                                    <p class="person-option-detail">Hasta 17 años</p>
+                                </div>
+                                <div class="person-option-increment">
+                                    <button type="button" class="youngPerson-increment-button" aria-label="Añadir un menor"><i class="fa-solid fa-plus"></i></button>
+                                    <input class="youngPerson-number" id="menores" type="number" value="0" min="0" max="8" aria-label="Menores">
+                                    <button type="button" class="youngPerson-minus-button" aria-label="Quitar un menor"><i class="fa-solid fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <p class="people-note">Máximo 9 pasajeros por reserva.</p>
+                            <button type="button" class="apply-button peopleChooser-button">Aplicar</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="search-button"><i class="fa-solid fa-magnifying-glass"></i>Buscar</button>
+
+                    <p class="search-error" id="errorBusqueda" role="alert" hidden></p>
+                </form>
+            </div>
+
+            <section class="page-container home-section" id="busquedasRecientes" hidden>
+                <h3 class="home-section-title">Tus búsquedas recientes</h3>
+                <div class="recent-list" id="listaRecientes"></div>
+            </section>
+
+            <section class="page-container home-section">
+                <h3 class="home-section-title">Destinos para empezar</h3>
+                <div class="route-cards" id="destinosPopulares"></div>
+            </section>
+
+            <section class="page-container home-section">
+                <div class="benefits">
+                    <div class="benefit">
+                        <div class="benefit-icon"><i class="fa-solid fa-tags"></i></div>
+                        <div>
+                            <p class="benefit-title">Compara aerolíneas</p>
+                            <p class="benefit-text">Todas las opciones de un trayecto en una sola búsqueda, con precio por persona y por grupo.</p>
+                        </div>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon"><i class="fa-solid fa-suitcase-rolling"></i></div>
+                        <div>
+                            <p class="benefit-title">Elige tu tarifa</p>
+                            <p class="benefit-text">Mira antes de reservar qué incluye cada tarifa: equipaje, cambios y reembolso.</p>
+                        </div>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon"><i class="fa-solid fa-ticket"></i></div>
+                        <div>
+                            <p class="benefit-title">Gestiona tus reservas</p>
+                            <p class="benefit-text">Consulta tu historial de vuelos, asientos asignados y cancela cuando lo necesites.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script src="js/comun.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>
