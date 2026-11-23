@@ -420,4 +420,4 @@ INSERT INTO administrador (correo, contrasena) values
  
 SELECT * FROM aeropuerto a
  
-SELECT * FROM vuelos
+

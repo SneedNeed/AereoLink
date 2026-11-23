@@ -5,7 +5,7 @@ class HttpError extends Error {
     constructor(status, message, campos) {
         super(message);
         this.status = status;
-        this.campos = campos; // errores por campo, ej. { correo: 'Ya está registrado' }
+        this.campos = campos;
     }
 }
 const bad = (msg, campos) => new HttpError(400, msg, campos);
@@ -55,15 +55,14 @@ function parseCookies(req) {
     return out;
 }
 
-/** Comparación en tiempo constante (evita ataques por tiempo). */
 function safeEqual(a, b) {
     const ha = crypto.createHash('sha256').update(String(a)).digest();
     const hb = crypto.createHash('sha256').update(String(b)).digest();
     return crypto.timingSafeEqual(ha, hb);
 }
 
-/** Traduce errores de PostgreSQL a respuestas entendibles. */
 function traducirErrorPg(err) {
+    if (/^AL\d{3}$/.test(err.code || '')) return new HttpError(Number(err.code.slice(2)), err.message);
     switch (err.code) {
         case '23505': return new HttpError(409, 'Ya existe un registro con esos datos.');
         case '23503': return new HttpError(409, 'No se puede completar la operación porque hay datos relacionados.');

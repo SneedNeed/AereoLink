@@ -1,5 +1,4 @@
 'use strict';
-// Pago (simulado) de una reserva PENDIENTE y pantalla de confirmación.
 (async function () {
     const $ = (id) => document.getElementById(id);
     const contenido = $('contenido');
@@ -28,7 +27,6 @@
             </div>`;
     }
 
-    // ------------------------------------------------------------------ resumen de la reserva (se reutiliza)
     function vuelosHtml(r) {
         return r.vuelos.map((v, i) => `
             <div class="summary-flight">
@@ -42,7 +40,6 @@
             </div>`).join('');
     }
 
-    // ------------------------------------------------------------------ pantallas según el estado
     function pantallaPago() {
         const r = reserva;
         $('tituloPago').textContent = 'Paga tu reserva';
@@ -105,7 +102,7 @@
             pintarCuenta();
             if (segundos <= 0) {
                 clearInterval(temporizador);
-                await recargar(); // el servidor dirá si ya expiró o si aún quedan minutos
+                await recargar();
             }
         }, 1000);
     }
@@ -175,7 +172,6 @@
         }
     }
 
-    // ------------------------------------------------------------------ acciones
     contenido.addEventListener('submit', async (e) => {
         if (e.target.id !== 'formPago') return;
         e.preventDefault();

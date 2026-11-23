@@ -1,8 +1,3 @@
-/* ==========================================================
-   AereoLink — Inicio de sesión y registro
-   Requiere styles.css (variables, header y base) cargado antes.
-   ========================================================== */
-
 .auth-main {
     display: flex;
     justify-content: center;
@@ -23,11 +18,6 @@
     border-radius: 20px;
     box-shadow: var(--shadow-card);
 }
-
-
-/* ==========================================================
-   PANEL DE MARCA
-   ========================================================== */
 
 .auth-brand {
     position: relative;
@@ -123,11 +113,6 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-
-/* ==========================================================
-   PANEL DE FORMULARIOS
-   ========================================================== */
-
 .auth-panel {
     display: flex;
     flex-direction: column;
@@ -135,8 +120,6 @@
     min-width: 0;
     padding: 36px 44px 40px;
 }
-
-/* ---------- Pestañas ---------- */
 
 .auth-tabs {
     display: flex;
@@ -169,8 +152,6 @@
     background: var(--white);
     box-shadow: 0 2px 8px rgba(6, 23, 51, 0.12);
 }
-
-/* ---------- Formularios ---------- */
 
 .auth-form {
     display: none;
@@ -220,12 +201,6 @@
 .document-row {
     grid-template-columns: 0.95fr 1.05fr;
 }
-
-
-/* ==========================================================
-   CAMPOS CON ETIQUETA FLOTANTE
-   (los inputs llevan placeholder=" " para detectarlo con CSS)
-   ========================================================== */
 
 .field-container {
     position: relative;
@@ -277,7 +252,6 @@
         color 0.18s var(--ease);
 }
 
-/* Etiqueta arriba: enfocado, con texto, autocompletado, select y fecha */
 .field-input:focus + .field-label,
 .field-input:not(:placeholder-shown) + .field-label,
 .field-input:-webkit-autofill + .field-label,
@@ -293,7 +267,6 @@ select.field-input + .field-label,
     color: var(--blue-600);
 }
 
-/* Select */
 select.field-input {
     padding-right: 40px;
     cursor: pointer;
@@ -304,7 +277,6 @@ select.field-input {
     -webkit-appearance: none;
 }
 
-/* Fecha */
 .field-input[type="date"] {
     cursor: pointer;
 }
@@ -319,7 +291,6 @@ select.field-input {
     opacity: 1;
 }
 
-/* Contraseña + ojo */
 .password-container .field-input {
     padding-right: 52px;
 }
@@ -354,7 +325,6 @@ select.field-input {
     color: var(--muted);
 }
 
-/* Errores (para activar desde JS con .has-error) */
 .field-error {
     display: none;
     margin: 6px 4px 0;
@@ -375,11 +345,6 @@ select.field-input {
 .field-container.has-error .field-error {
     display: block;
 }
-
-
-/* ==========================================================
-   OPCIONES, CHECKBOX Y ENLACES
-   ========================================================== */
 
 .form-options {
     display: flex;
@@ -457,11 +422,6 @@ select.field-input {
 .terms-option .form-link {
     font-size: inherit;
 }
-
-
-/* ==========================================================
-   BOTONES
-   ========================================================== */
 
 .submit-button {
     display: flex;
@@ -568,7 +528,6 @@ select.field-input {
     text-decoration: underline;
 }
 
-/* Foco visible con teclado */
 .auth-tab:focus-visible,
 .submit-button:focus-visible,
 .social-button:focus-visible,
@@ -578,11 +537,6 @@ select.field-input {
     outline: 3px solid rgba(34, 114, 234, 0.35);
     outline-offset: 2px;
 }
-
-
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
 
 @media (max-width: 900px) {
     .auth-container {

@@ -1,5 +1,4 @@
 'use strict';
-// Validaciones que replican las reglas (CHECK) de la base de datos, para dar mensajes claros.
 const { bad } = require('./util');
 
 const TIPOS_DOC_CLIENTE = ['CC', 'CE', 'PAS'];
@@ -19,7 +18,6 @@ function fechaValida(s) {
     return !isNaN(d) && d.toISOString().slice(0, 10) === s ? s : null;
 }
 
-/** Fecha de hoy (YYYY-MM-DD) en Colombia. */
 function hoy() {
     return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
 }
@@ -38,7 +36,6 @@ function edadEn(nacimiento, referencia) {
     return e;
 }
 
-/** Fecha máxima de nacimiento para ser mayor de edad hoy. */
 function fechaMaxMayorDeEdad() {
     const [y, m, d] = hoy().split('-');
     return `${Number(y) - 18}-${m}-${d}`;
@@ -55,10 +52,6 @@ function validarNumeroDocumento(tipo, numero) {
     return /^\d{5,15}$/.test(numero) ? null : 'El número de documento debe tener entre 5 y 15 dígitos.';
 }
 
-/**
- * Valida los datos de una persona que viaja.
- * Devuelve el objeto normalizado o lanza un error 400 con `campos`.
- */
 function validarPasajero(p, fechaRef) {
     const campos = {};
     const tipo = String(p.tipo_documento || '').toUpperCase();

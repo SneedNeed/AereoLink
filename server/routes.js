@@ -1,5 +1,4 @@
 'use strict';
-// Tabla de rutas de la API (/api/...). Cada ruta indica quién puede usarla: pública, cliente o admin.
 const { HttpError, bad, sendJson, readJson } = require('./util');
 const { leerSesion, iniciarSesion, cerrarSesion } = require('./session');
 const catalogo = require('./catalogo.service');
@@ -20,7 +19,7 @@ const idDe = (v) => {
     return n;
 };
 
-// Límite simple de intentos (por IP) para frenar adivinación de contraseñas.
+// máximo de intentos de login por IP
 const intentos = new Map();
 function limitar(ctx, clave, max, ventanaMs) {
     const k = `${clave}:${ctx.req.socket.remoteAddress || '?'}`;
@@ -37,7 +36,6 @@ setInterval(() => {
     for (const [k, r] of intentos) if (r.hasta < ahora) intentos.delete(k);
 }, 5 * 60 * 1000).unref();
 
-// ============================================================ públicas
 ruta('GET', '/api/aeropuertos', null, () => catalogo.listarAeropuertos());
 
 ruta('GET', '/api/vuelos', null, (ctx) => {
@@ -47,7 +45,6 @@ ruta('GET', '/api/vuelos', null, (ctx) => {
 
 ruta('GET', '/api/tarifas', null, (ctx) => catalogo.tarifasPorIds(String(ctx.query.ids || '').split(',').map(Number)));
 
-// ============================================================ autenticación
 ruta('POST', '/api/auth/registro', null, async (ctx) => {
     limitar(ctx, 'registro', 10, 60_000);
     const c = await cuentas.registrarCliente(ctx.body);
@@ -70,7 +67,6 @@ ruta('POST', '/api/auth/logout', null, (ctx) => {
 
 ruta('GET', '/api/auth/sesion', null, (ctx) => cuentas.datosSesion(ctx.sesion));
 
-// ============================================================ cliente
 ruta('GET', '/api/cliente/perfil', 'cliente', (ctx) => cuentas.obtenerPerfil(ctx.sesion.id));
 ruta('PUT', '/api/cliente/perfil', 'cliente', (ctx) => cuentas.actualizarPerfil(ctx.sesion.id, ctx.body));
 ruta('PUT', '/api/cliente/password', 'cliente', (ctx) => cuentas.cambiarPassword(ctx.sesion.id, ctx.body));
@@ -87,7 +83,6 @@ ruta('GET', '/api/reservas/:id', 'cliente', (ctx) => reservas.obtenerReserva(idD
 ruta('POST', '/api/reservas/:id/pagar', 'cliente', (ctx) => reservas.pagarReserva(idDe(ctx.params.id), ctx.sesion.id, ctx.body.metodo));
 ruta('POST', '/api/reservas/:id/cancelar', 'cliente', (ctx) => reservas.cancelarReserva(idDe(ctx.params.id), ctx.sesion.id));
 
-// ============================================================ administrador
 ruta('GET', '/api/admin/resumen', 'admin', () => admin.resumen());
 
 ruta('GET', '/api/admin/vuelos', 'admin', (ctx) => admin.listarVuelos(ctx.query));
@@ -108,7 +103,6 @@ ruta('PATCH', '/api/admin/clientes/:id', 'admin', (ctx) => admin.cambiarEstadoCl
 ruta('GET', '/api/admin/aerolineas', 'admin', () => admin.listarAerolineas());
 ruta('PATCH', '/api/admin/aerolineas/:id', 'admin', (ctx) => admin.cambiarEstadoAerolinea(String(ctx.params.id), ctx.body.estado));
 
-// ============================================================ despachador
 async function manejarApi(req, res, url) {
     let coincideRuta = false;
     for (const r of rutas) {

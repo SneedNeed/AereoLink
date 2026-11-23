@@ -1,5 +1,4 @@
 'use strict';
-// Cuentas de clientes: registro, inicio de sesión, perfil, contraseña, pasajeros guardados e historial de búsquedas.
 const { query } = require('./db');
 const config = require('./config');
 const { HttpError, bad, safeEqual } = require('./util');
@@ -14,7 +13,6 @@ function validarNombre(valor, etiqueta, max) {
     return null;
 }
 
-// ------------------------------------------------------------------ registro
 async function registrarCliente(body) {
     const campos = {};
     const tipo = String(body.tipo_documento || '').toUpperCase();
@@ -66,8 +64,6 @@ async function registrarCliente(body) {
     }
 }
 
-// ------------------------------------------------------------------ login
-/** Devuelve { rol, id?, correo?, nombre } si las credenciales son correctas. */
 async function autenticar(correoEntrada, contrasenaEntrada) {
     const correo = texto(correoEntrada);
     const contrasena = typeof contrasenaEntrada === 'string' ? contrasenaEntrada : '';
@@ -91,7 +87,6 @@ async function autenticar(correoEntrada, contrasenaEntrada) {
     throw fallo();
 }
 
-/** Estado de la sesión actual para el encabezado de las páginas. */
 async function datosSesion(s) {
     if (!s) return { autenticado: false };
     if (s.rol === 'admin') return { autenticado: true, rol: 'admin', nombre: 'Administrador', correo: s.correo };
@@ -108,13 +103,11 @@ async function datosSesion(s) {
     return { autenticado: true, rol: 'cliente', nombre: c.nombre_completo, correo: c.correo, pendientes: c.pendientes };
 }
 
-/** Confirma que una cuenta de cliente sigue activa (se usa en cada acción de cliente). */
 async function clienteActivo(id) {
     const { rows } = await query('SELECT estado FROM cliente WHERE id_cliente = $1', [id]);
     return rows.length > 0 && rows[0].estado === 'ACTIVO';
 }
 
-// ------------------------------------------------------------------ perfil
 async function obtenerPerfil(id) {
     const { rows } = await query(
         `SELECT c.id_cliente, c.tipo_documento, c.numero_documento, c.nombre_completo, c.correo, c.telefono,
@@ -162,7 +155,6 @@ async function cambiarPassword(id, body) {
     return { ok: true };
 }
 
-// ------------------------------------------------------------------ pasajeros y búsquedas
 async function listarPasajeros(idCliente) {
     const { rows } = await query(
         `SELECT id_pasajero, tipo_documento, numero_documento, nombre_completo, nacionalidad,
@@ -173,7 +165,6 @@ async function listarPasajeros(idCliente) {
     return rows;
 }
 
-/** Últimas rutas buscadas por el cliente (sin repetir ruta). */
 async function busquedasRecientes(idCliente) {
     const { rows } = await query(
         `SELECT origen, destino, fecha_ida, fecha_regreso, pasajeros FROM (

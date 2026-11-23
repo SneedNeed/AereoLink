@@ -1,5 +1,4 @@
 'use strict';
-// Lógica de reservas: crear, consultar, pagar (simulado), cancelar y expirar.
 const crypto = require('crypto');
 const { query, tx } = require('./db');
 const config = require('./config');
@@ -8,11 +7,10 @@ const { validarPasajero, hoy } = require('./validators');
 const { ciudadVisible } = require('./ciudades');
 
 const TS = (col) => `to_char(${col}, 'YYYY-MM-DD"T"HH24:MI:SS')`;
-const AHORA_LOCAL = 'CURRENT_TIMESTAMP::timestamp'; // la sesión usa hora de Colombia (ver db.js)
+const AHORA_LOCAL = 'CURRENT_TIMESTAMP::timestamp'; // la sesión ya está en hora de Colombia
 
 const METODOS_PAGO = ['TARJETA_CREDITO', 'TARJETA_DEBITO', 'PSE', 'TRANSFERENCIA'];
 
-// ---------------------------------------------------------------- asientos
 const LETRAS = 'ABCDEF';
 const asientoDeIndice = (i) => `${Math.floor(i / 6) + 1}${LETRAS[i % 6]}`;
 const indiceDeAsiento = (s) => {
@@ -24,52 +22,17 @@ function generarCodigo() {
     const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let s = 'AL';
     for (let i = 0; i < 8; i++) s += alfabeto[crypto.randomInt(alfabeto.length)];
-    return s; // 10 caracteres (la columna admite 12)
+    return s;
 }
 
-// ---------------------------------------------------------------- cupos
-/** Devuelve los cupos de una reserva y cambia su estado (CANCELADA / EXPIRADA). */
 async function liberarYCambiarEstado(c, idReserva, nuevoEstado, observacion) {
-    await c.query(
-        `UPDATE vuelo v
-            SET cupos_disponibles = LEAST(v.capacidad_total, v.cupos_disponibles + x.n)
-           FROM (SELECT t.id_vuelo, COUNT(*)::int AS n
-                   FROM detalle_reserva d JOIN tarifa t ON t.id_tarifa = d.id_tarifa
-                  WHERE d.id_reserva = $1 GROUP BY t.id_vuelo) x
-          WHERE v.id_vuelo = x.id_vuelo`,
-        [idReserva]
-    );
-    await c.query(
-        `UPDATE tarifa t
-            SET cupos_tarifa = t.cupos_tarifa + x.n
-           FROM (SELECT d.id_tarifa, COUNT(*)::int AS n
-                   FROM detalle_reserva d WHERE d.id_reserva = $1 GROUP BY d.id_tarifa) x
-          WHERE t.id_tarifa = x.id_tarifa`,
-        [idReserva]
-    );
-    await c.query(
-        `UPDATE reserva SET estado_reserva = $2, observaciones = COALESCE($3, observaciones) WHERE id_reserva = $1`,
-        [idReserva, nuevoEstado, observacion || null]
-    );
+    await c.query('CALL sp_liberar_reserva($1, $2, $3)', [idReserva, nuevoEstado, observacion || null]);
 }
 
-/** Las reservas PENDIENTES sin pagar después de N minutos pasan a EXPIRADA y liberan sus cupos. */
 async function expirarPendientes() {
-    await tx(async (c) => {
-        const { rows } = await c.query(
-            `SELECT id_reserva FROM reserva
-              WHERE estado_reserva = 'PENDIENTE'
-                AND fecha_reserva < ${AHORA_LOCAL} - ($1::int * INTERVAL '1 minute')
-              ORDER BY id_reserva FOR UPDATE SKIP LOCKED`,
-            [config.minutosParaPagar]
-        );
-        for (const r of rows) {
-            await liberarYCambiarEstado(c, r.id_reserva, 'EXPIRADA', 'Expirada por falta de pago');
-        }
-    });
+    await query('CALL sp_expirar_reservas($1)', [config.minutosParaPagar]);
 }
 
-// ---------------------------------------------------------------- crear
 async function crearReserva(idCliente, body) {
     const idsTarifa = Array.isArray(body.tarifas) ? body.tarifas.map(Number) : [];
     if (idsTarifa.length < 1 || idsTarifa.length > 2 || idsTarifa.some((n) => !Number.isInteger(n) || n <= 0) || new Set(idsTarifa).size !== idsTarifa.length) {
@@ -81,7 +44,7 @@ async function crearReserva(idCliente, body) {
     await expirarPendientes();
 
     return tx(async (c) => {
-        // 1) Vuelos y tarifas elegidos (se bloquean para evitar sobreventa)
+        // se bloquean las tarifas para no vender de más
         const { rows: filas } = await c.query(
             `SELECT t.id_tarifa, t.id_vuelo, t.precio_tarifa::float8 AS precio, t.equipaje_bodega_kg::float8 AS bodega,
                     t.cupos_tarifa, v.aeropuerto_origen, v.aeropuerto_destino, v.estado, v.cupos_disponibles,
@@ -97,7 +60,7 @@ async function crearReserva(idCliente, body) {
             [idsTarifa]
         );
         if (filas.length !== idsTarifa.length) throw bad('Una de las tarifas seleccionadas ya no existe.');
-        const legs = idsTarifa.map((id) => filas.find((f) => f.id_tarifa === id)); // [ida, vuelta?]
+        const legs = idsTarifa.map((id) => filas.find((f) => f.id_tarifa === id));
         const n = entrada.length;
 
         for (const l of legs) {
@@ -117,7 +80,6 @@ async function crearReserva(idCliente, body) {
         }
         const fechaRef = legs[0].dia_salida;
 
-        // 2) Pasajeros (guardados o nuevos)
         const idsGuardados = entrada.filter((p) => p.id_pasajero).map((p) => Number(p.id_pasajero));
         let guardados = [];
         if (idsGuardados.length) {
@@ -153,7 +115,6 @@ async function crearReserva(idCliente, body) {
         if (claves.size !== pasajeros.length) throw bad('Hay pasajeros repetidos (mismo documento).');
         if (!pasajeros.some((p) => p.edad >= 18)) throw bad('Debe viajar al menos un adulto (mayor de 18 años).');
 
-        // 3) Crear/actualizar pasajeros en la base de datos
         for (const p of pasajeros) {
             if (p.id_pasajero) continue;
             const r = await c.query(
@@ -169,7 +130,6 @@ async function crearReserva(idCliente, body) {
             p.id_pasajero = r.rows[0].id_pasajero;
         }
 
-        // 4) Reserva
         let codigo;
         do {
             codigo = generarCodigo();
@@ -180,7 +140,6 @@ async function crearReserva(idCliente, body) {
             [codigo, idCliente]
         );
 
-        // 5) Detalle por vuelo y pasajero, con asiento asignado
         let total = 0;
         for (const l of legs) {
             const { rows: ocupados } = await c.query(
@@ -218,8 +177,6 @@ async function crearReserva(idCliente, body) {
     });
 }
 
-// ---------------------------------------------------------------- consultar
-/** Arma el detalle completo (vuelos, tarifas, segmentos y pasajeros) de una o varias reservas. */
 async function detalleReservas(ids) {
     if (!ids.length) return [];
     const { rows: cab } = await query(
@@ -317,54 +274,19 @@ async function listarReservasCliente(idCliente) {
         [idCliente]
     );
     const detalle = await detalleReservas(rows.map((r) => r.id_reserva));
-    // detalleReservas no garantiza orden: se reordena igual que la consulta
+    // detalleReservas no devuelve en el mismo orden
     return rows.map((r) => detalle.find((d) => d.id_reserva === r.id_reserva));
 }
 
-// ---------------------------------------------------------------- pagar / cancelar
 async function pagarReserva(idReserva, idCliente, metodo) {
-    if (!METODOS_PAGO.includes(metodo)) throw bad('Selecciona un método de pago válido.');
     await expirarPendientes();
-    await tx(async (c) => {
-        const { rows } = await c.query(
-            'SELECT estado_reserva FROM reserva WHERE id_reserva = $1 AND id_cliente = $2 FOR UPDATE',
-            [idReserva, idCliente]
-        );
-        if (!rows.length) throw new HttpError(404, 'No encontramos esa reserva.');
-        if (rows[0].estado_reserva === 'EXPIRADA') throw new HttpError(409, 'La reserva expiró por falta de pago. Realiza una nueva búsqueda.');
-        if (rows[0].estado_reserva !== 'PENDIENTE') throw new HttpError(409, 'Esta reserva ya no está pendiente de pago.');
-        const referencia = crypto.randomBytes(5).toString('hex').toUpperCase();
-        await c.query(
-            `UPDATE reserva SET estado_reserva = 'CONFIRMADA', observaciones = $2 WHERE id_reserva = $1`,
-            [idReserva, `Pago simulado (${metodo}) ref. ${referencia}`]
-        );
-    });
+    await query('SELECT fn_pagar_reserva($1, $2, $3)', [idReserva, idCliente, metodo]);
     return obtenerReserva(idReserva, idCliente);
 }
 
-/** idCliente = null cuando cancela un administrador. */
 async function cancelarReserva(idReserva, idCliente, observacion) {
     await expirarPendientes();
-    await tx(async (c) => {
-        const { rows } = await c.query(
-            'SELECT estado_reserva FROM reserva WHERE id_reserva = $1 AND ($2::int IS NULL OR id_cliente = $2::int) FOR UPDATE',
-            [idReserva, idCliente || null]
-        );
-        if (!rows.length) throw new HttpError(404, 'No encontramos esa reserva.');
-        if (!['PENDIENTE', 'CONFIRMADA'].includes(rows[0].estado_reserva)) {
-            throw new HttpError(409, 'Esta reserva ya no se puede cancelar.');
-        }
-        if (idCliente) {
-            const ya = await c.query(
-                `SELECT 1 FROM detalle_reserva d JOIN tarifa t ON t.id_tarifa = d.id_tarifa
-                   JOIN vuelo v ON v.id_vuelo = t.id_vuelo
-                  WHERE d.id_reserva = $1 AND v.fecha_salida <= ${AHORA_LOCAL} LIMIT 1`,
-                [idReserva]
-            );
-            if (ya.rowCount) throw new HttpError(409, 'No puedes cancelar una reserva con vuelos que ya salieron.');
-        }
-        await liberarYCambiarEstado(c, idReserva, 'CANCELADA', observacion || (idCliente ? 'Cancelada por el cliente' : 'Cancelada por el administrador'));
-    });
+    await query('CALL sp_cancelar_reserva($1, $2, $3)', [idReserva, idCliente || null, observacion || null]);
     return obtenerReserva(idReserva, idCliente);
 }
 

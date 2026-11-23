@@ -5,6 +5,11 @@ pago simulado, historial de reservas, perfil y panel de administración. Todo so
 
 ## Cómo ejecutarlo
 
+**En Windows, lo más fácil:** haz doble clic en **`Inicio.bat`**. La primera vez instala lo necesario, te pide la contraseña de PostgreSQL,
+crea las tablas y los vuelos de demostración; las siguientes veces solo enciende el servidor y abre la página.
+
+O a mano:
+
 Necesitas **Node.js 18 o superior** y **PostgreSQL** encendido.
 
 ```bash
@@ -17,7 +22,7 @@ npm start                   # abre http://localhost:3000
 
 * `npm run db:init` **borra y recrea las tablas**. Si ya hay clientes, pide confirmar con `npm run db:init -- --forzar`.
 * `npm run db:demo` solo renueva los vuelos de demostración (no borra nada). Úsalo cuando pasen los días y se acaben los vuelos futuros.
-* Los vuelos de demostración cubren 20 rutas (ida y vuelta), 3 horarios al día, durante 45 días desde que ejecutas el comando.
+* Los vuelos de demostración cubren todas las rutas entre los 47 aeropuertos (ida y vuelta), con 2 o 3 salidas al día durante 45 días desde que ejecutas el comando. Las rutas sin vuelo directo pasan por una escala (BOG, MDE, CLO o BAQ).
 
 ## Cuentas de prueba
 

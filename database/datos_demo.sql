@@ -1,87 +1,95 @@
--- ============================================================================
--- AereoLink - DATOS DEMO (opcional)
--- Ejecutar DESPUÉS de Proyecto_Aerolink.sql.
---
--- Genera vuelos, segmentos y tarifas para los próximos 45 días en varias rutas
--- de Colombia, más un cliente de prueba:
---     correo: demo@aerolink.com      contraseña: Demo1234
---
--- Se puede volver a ejecutar cuando quieras: agrega los días nuevos y no
--- duplica lo que ya existe.
--- ============================================================================
+-- Datos de demostración. Se corre después de Proyecto_Aerolink.sql y se puede repetir:
+-- solo agrega los días nuevos. Cliente de prueba: demo@aerolink.com / Demo1234
 
--- ---------- Cliente de prueba ----------
 INSERT INTO cliente (tipo_documento, numero_documento, nombre_completo, correo, telefono, fecha_nacimiento, contrasena)
 VALUES ('CC', '1000000001', 'Cliente Demo', 'demo@aerolink.com', '3001234567', DATE '1995-05-20', 'Demo1234')
 ON CONFLICT DO NOTHING;
 
--- ---------- Rutas base (se generan en ambos sentidos) ----------
--- via = aeropuerto de escala (NULL = directo)
-CREATE TEMP TABLE _ruta (
-    id_ruta     INT,
-    origen      CHAR(3),
-    destino     CHAR(3),
-    via         CHAR(3),
-    dur1_min    INT,      -- duración del primer tramo (o del vuelo directo)
-    espera_min  INT,      -- espera en la escala
-    dur2_min    INT,      -- duración del segundo tramo
-    precio_base NUMERIC
-);
+CREATE INDEX IF NOT EXISTS idx_vuelo_ruta_fecha ON vuelo (aeropuerto_origen, aeropuerto_destino, fecha_salida);
 
-INSERT INTO _ruta VALUES
-    ( 1, 'BOG', 'MDE', NULL,  50,   0,   0, 189000),
-    ( 2, 'BOG', 'CTG', NULL,  95,   0,   0, 259000),
-    ( 3, 'BOG', 'CLO', NULL,  65,   0,   0, 199000),
-    ( 4, 'BOG', 'BAQ', NULL,  90,   0,   0, 249000),
-    ( 5, 'BOG', 'SMR', NULL,  95,   0,   0, 269000),
-    ( 6, 'BOG', 'ADZ', NULL, 140,   0,   0, 389000),
-    ( 7, 'BOG', 'PEI', NULL,  50,   0,   0, 179000),
-    ( 8, 'BOG', 'BGA', NULL,  60,   0,   0, 189000),
-    ( 9, 'BOG', 'CUC', NULL,  75,   0,   0, 219000),
-    (10, 'BOG', 'LET', NULL, 105,   0,   0, 329000),
-    (11, 'BOG', 'MTR', NULL,  80,   0,   0, 229000),
-    (12, 'MDE', 'CTG', NULL,  70,   0,   0, 219000),
-    (13, 'MDE', 'CLO', NULL,  55,   0,   0, 169000),
-    (14, 'MDE', 'ADZ', NULL, 110,   0,   0, 349000),
-    (15, 'CLO', 'CTG', 'BOG', 65,  75,  95, 329000),
-    (16, 'CLO', 'BAQ', 'BOG', 65,  80,  90, 319000),
-    (17, 'BAQ', 'MDE', NULL,  70,   0,   0, 209000),
-    (18, 'CTG', 'PEI', 'BOG', 95,  70,  50, 299000),
-    (19, 'SMR', 'MDE', 'BOG', 95,  90,  50, 309000),
-    (20, 'BGA', 'CTG', 'BOG', 60,  75,  95, 289000);
+-- Los vuelos de la primera versión de los datos usaban un código corto (AV11-1210).
+-- Se reemplazan por los nuevos, salvo los que ya tengan reservas.
+DELETE FROM vuelo v
+WHERE v.codigo_vuelo ~ '^[A-Z0-9]{2}[0-9]{1,3}-[0-9]{4}$'
+  AND NOT EXISTS (SELECT 1 FROM tarifa t JOIN detalle_reserva d ON d.id_tarifa = t.id_tarifa
+                  WHERE t.id_vuelo = v.id_vuelo);
 
--- Ambos sentidos
+-- nivel 1: centros principales, 2: capitales y destinos grandes, 3: aeropuertos regionales
+CREATE TEMP TABLE _apt (cod CHAR(3) PRIMARY KEY, lat DOUBLE PRECISION, lon DOUBLE PRECISION, nivel INT);
+INSERT INTO _apt VALUES
+    ('BOG',  4.701, -74.147, 1), ('MDE',  6.164, -75.423, 1),
+    ('CLO',  3.543, -76.382, 2), ('CTG', 10.443, -75.513, 2), ('BAQ', 10.890, -74.781, 2),
+    ('SMR', 11.120, -74.231, 2), ('BGA',  7.128, -73.181, 2), ('CUC',  7.928, -72.511, 2),
+    ('PEI',  4.813, -75.739, 2), ('ADZ', 12.584, -81.711, 2), ('MTR',  8.824, -75.826, 2);
+INSERT INTO _apt VALUES
+    ('APO',  7.968, -76.716, 3), ('AUC',  7.069, -70.737, 3), ('AXM',  4.453, -75.766, 3),
+    ('BSC',  6.203, -77.395, 3), ('BUN',  3.820, -76.990, 3), ('CZU',  9.332, -75.286, 3),
+    ('EBG',  7.597, -74.809, 3), ('EJA',  7.024, -73.807, 3), ('EOH',  6.220, -75.591, 3),
+    ('EYP',  5.319, -72.384, 3), ('FLA',  1.589, -75.564, 3), ('GIR',  4.282, -74.797, 3),
+    ('GPI',  2.571, -77.887, 3), ('IBE',  4.422, -75.133, 3), ('IPI',  0.862, -77.672, 3),
+    ('LET', -4.194, -69.943, 3), ('LGZ', -0.183, -74.771, 3), ('MVP',  1.254, -70.234, 3),
+    ('MZL',  5.030, -75.465, 3), ('NVA',  2.950, -75.294, 3), ('OCV',  8.315, -73.358, 3),
+    ('PCR',  6.185, -67.493, 3), ('PDA',  3.853, -67.906, 3), ('PPN',  2.454, -76.610, 3),
+    ('PSO',  1.396, -77.291, 3), ('PTX',  1.858, -76.085, 3), ('PUU',  0.505, -76.501, 3),
+    ('PVA', 13.357, -81.358, 3), ('RCH', 11.526, -72.926, 3), ('RVE',  6.952, -71.857, 3),
+    ('SJE',  2.580, -72.640, 3), ('TCO',  1.814, -78.749, 3), ('TME',  6.455, -71.763, 3),
+    ('UIB',  5.691, -76.641, 3), ('VUP', 10.435, -73.250, 3), ('VVC',  4.168, -73.614, 3);
+
+-- Distancia en km entre cada par de aeropuertos
+CREATE TEMP TABLE _dist AS
+SELECT a.cod AS o, b.cod AS d, a.nivel AS nivel_o, b.nivel AS nivel_d,
+       6371 * acos(LEAST(1, sin(radians(a.lat)) * sin(radians(b.lat))
+                          + cos(radians(a.lat)) * cos(radians(b.lat)) * cos(radians(b.lon - a.lon)))) AS km
+FROM _apt a JOIN _apt b ON a.cod <> b.cod;
+
+CREATE TEMP TABLE _hub (cod CHAR(3));
+INSERT INTO _hub VALUES ('BOG'), ('MDE'), ('CLO'), ('BAQ');
+
+-- Una ruta por cada par ordenado de aeropuertos. Si no hay vuelo directo se pasa por el hub más cercano al camino.
+CREATE TEMP TABLE _via AS
+SELECT x.o, x.d, x.km, x.directo, x.frecuente,
+       CASE WHEN x.directo THEN NULL ELSE
+            (SELECT h.cod FROM _hub h
+               JOIN _dist d1 ON d1.o = x.o AND d1.d = h.cod
+               JOIN _dist d2 ON d2.o = h.cod AND d2.d = x.d
+              ORDER BY d1.km + d2.km, h.cod LIMIT 1)
+       END AS via
+FROM (SELECT o, d, km,
+             (o = 'BOG' OR d = 'BOG' OR (nivel_o <= 2 AND nivel_d <= 2) OR km < 250) AS directo,
+             ((o = 'BOG' OR d = 'BOG' OR (nivel_o <= 2 AND nivel_d <= 2)) AND LEAST(nivel_o, nivel_d) <= 2) AS frecuente
+      FROM _dist) x;
+
 CREATE TEMP TABLE _ruta2 AS
-SELECT id_ruta * 2 - 1 AS id_dir, origen, destino, via, dur1_min, espera_min, dur2_min, precio_base FROM _ruta
-UNION ALL
-SELECT id_ruta * 2, destino, origen, via,
-       CASE WHEN via IS NULL THEN dur1_min ELSE dur2_min END,
-       espera_min,
-       CASE WHEN via IS NULL THEN 0 ELSE dur1_min END,
-       precio_base
-FROM _ruta;
+SELECT row_number() OVER (ORDER BY v.o, v.d) AS id_dir,
+       v.o AS origen, v.d AS destino, v.via, v.frecuente,
+       CASE WHEN v.via IS NULL THEN round(25 + v.km / 10)::int ELSE round(25 + d1.km / 10)::int END AS dur1_min,
+       CASE WHEN v.via IS NULL THEN 0 ELSE 60 + (abs(hashtext(v.o || v.d)) % 5) * 10 END AS espera_min,
+       CASE WHEN v.via IS NULL THEN 0 ELSE round(25 + d2.km / 10)::int END AS dur2_min,
+       CASE WHEN v.via IS NULL THEN round((120000 + v.km * 230) / 1000) * 1000
+            ELSE round((110000 + (d1.km + d2.km) * 200) / 1000) * 1000 END AS precio_base
+FROM _via v
+LEFT JOIN _dist d1 ON d1.o = v.o AND d1.d = v.via
+LEFT JOIN _dist d2 ON d2.o = v.via AND d2.d = v.d;
 
--- Franjas horarias diarias
 CREATE TEMP TABLE _franja (slot INT, hora TIME);
 INSERT INTO _franja VALUES (1, '06:30'), (2, '12:15'), (3, '18:40');
 
--- ---------- VUELOS ----------
--- Aerolíneas activas: AER-001 ... AER-005
+-- Rutas frecuentes: 3 salidas al día. Las demás: 2 (se omite una franja distinta según la ruta).
+-- Aerolíneas activas: AER-001 a AER-005.
 INSERT INTO vuelo (codigo_vuelo, id_aerolinea, aeropuerto_origen, aeropuerto_destino,
                    fecha_salida, fecha_llegada, cantidad_escalas, capacidad_total,
                    cupos_disponibles, precio_base, estado)
 SELECT
-    al.codigo_iata || (r.id_dir * 10 + f.slot) || '-' || to_char(d.dia, 'MMDD'),
+    al.codigo_iata || lpad(r.id_dir::text, 4, '0') || f.slot || '-' || to_char(d.dia, 'MMDD'),
     al.id_aerolinea,
     r.origen,
     r.destino,
-    d.dia + f.hora + ((r.id_dir % 4) * 5) * INTERVAL '1 minute',
-    d.dia + f.hora + ((r.id_dir % 4) * 5) * INTERVAL '1 minute'
+    d.dia + f.hora + ((r.id_dir % 12) * 5) * INTERVAL '1 minute',
+    d.dia + f.hora + ((r.id_dir % 12) * 5) * INTERVAL '1 minute'
         + (r.dur1_min + r.espera_min + r.dur2_min) * INTERVAL '1 minute',
     CASE WHEN r.via IS NULL THEN 0 ELSE 1 END,
     cap.capacidad,
     cap.capacidad - (random() * cap.capacidad * 0.35)::int,
-    -- precio: base de la ruta con variación por franja y por día de la semana
     round((r.precio_base
            * (CASE f.slot WHEN 1 THEN 0.92 WHEN 2 THEN 1.00 ELSE 1.12 END)
            * (CASE WHEN EXTRACT(ISODOW FROM d.dia) IN (5, 7) THEN 1.15 ELSE 1.00 END)
@@ -89,7 +97,7 @@ SELECT
            * (0.95 + random() * 0.20)) / 1000) * 1000,
     'PROGRAMADO'
 FROM _ruta2 r
-CROSS JOIN _franja f
+JOIN _franja f ON r.frecuente OR f.slot <> (r.id_dir % 3) + 1
 CROSS JOIN (SELECT (CURRENT_DATE + n)::date AS dia FROM generate_series(0, 44) AS n) AS d
 JOIN aerolinea al
   ON al.id_aerolinea = 'AER-00' || (1 + ((r.id_dir + f.slot) % 5))
@@ -103,24 +111,16 @@ CROSS JOIN LATERAL (
 ) cap
 ON CONFLICT (codigo_vuelo) DO NOTHING;
 
--- ---------- SEGMENTOS (solo para vuelos que todavía no los tienen) ----------
--- Vuelos directos: un segmento
+-- Segmentos: uno por vuelo directo, dos por vuelo con escala
 INSERT INTO segmento_vuelo (id_vuelo, orden_segmento, aeropuerto_salida, aeropuerto_llegada,
                             fecha_salida_seg, fecha_llegada_seg, tiempo_escala_min)
-SELECT v.id_vuelo, 1, v.aeropuerto_origen, v.aeropuerto_destino, v.fecha_salida, v.fecha_llegada, 0
-FROM vuelo v
-WHERE v.cantidad_escalas = 0
-  AND NOT EXISTS (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo);
-
--- Vuelos con 1 escala: dos segmentos (tramo 1, espera, tramo 2)
-INSERT INTO segmento_vuelo (id_vuelo, orden_segmento, aeropuerto_salida, aeropuerto_llegada,
-                            fecha_salida_seg, fecha_llegada_seg, tiempo_escala_min)
-SELECT v.id_vuelo, 1, v.aeropuerto_origen, r.via,
-       v.fecha_salida, v.fecha_salida + r.dur1_min * INTERVAL '1 minute', 0
+SELECT v.id_vuelo, 1, v.aeropuerto_origen, COALESCE(r.via, v.aeropuerto_destino),
+       v.fecha_salida,
+       CASE WHEN r.via IS NULL THEN v.fecha_llegada ELSE v.fecha_salida + r.dur1_min * INTERVAL '1 minute' END,
+       0
 FROM vuelo v
 JOIN _ruta2 r ON r.origen = v.aeropuerto_origen AND r.destino = v.aeropuerto_destino
-WHERE v.cantidad_escalas = 1
-  AND NOT EXISTS (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo);
+WHERE NOT EXISTS (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo AND s.orden_segmento = 1);
 
 INSERT INTO segmento_vuelo (id_vuelo, orden_segmento, aeropuerto_salida, aeropuerto_llegada,
                             fecha_salida_seg, fecha_llegada_seg, tiempo_escala_min)
@@ -130,20 +130,17 @@ SELECT v.id_vuelo, 2, r.via, v.aeropuerto_destino,
        r.espera_min
 FROM vuelo v
 JOIN _ruta2 r ON r.origen = v.aeropuerto_origen AND r.destino = v.aeropuerto_destino
-WHERE v.cantidad_escalas = 1
-  AND NOT EXISTS (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo AND s.orden_segmento = 2)
-  AND EXISTS     (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo AND s.orden_segmento = 1);
+WHERE r.via IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM segmento_vuelo s WHERE s.id_vuelo = v.id_vuelo AND s.orden_segmento = 2);
 
--- ---------- TARIFAS (solo para vuelos sin tarifas) ----------
--- Económica Light: la más barata (= precio_base del vuelo)
+-- Tarifas. Light = precio base del vuelo.
 INSERT INTO tarifa (id_vuelo, clase_cabina, nombre_tarifa, precio_tarifa, equipaje_mano_kg,
                     equipaje_bodega_kg, permite_cambios, reembolsable, cupos_tarifa)
 SELECT v.id_vuelo, 'ECONOMICA', 'Light', v.precio_base, 10, 0, FALSE, FALSE,
        GREATEST(1, (v.cupos_disponibles * 0.6)::int)
 FROM vuelo v
-WHERE NOT EXISTS (SELECT 1 FROM tarifa t WHERE t.id_vuelo = v.id_vuelo);
+WHERE NOT EXISTS (SELECT 1 FROM tarifa t WHERE t.id_vuelo = v.id_vuelo AND t.nombre_tarifa = 'Light');
 
--- Económica Classic: con maleta de bodega y cambios
 INSERT INTO tarifa (id_vuelo, clase_cabina, nombre_tarifa, precio_tarifa, equipaje_mano_kg,
                     equipaje_bodega_kg, permite_cambios, reembolsable, cupos_tarifa)
 SELECT v.id_vuelo, 'ECONOMICA', 'Classic', round(v.precio_base * 1.28 / 1000) * 1000, 10, 23, TRUE, FALSE,
@@ -151,7 +148,7 @@ SELECT v.id_vuelo, 'ECONOMICA', 'Classic', round(v.precio_base * 1.28 / 1000) * 
 FROM vuelo v
 WHERE NOT EXISTS (SELECT 1 FROM tarifa t WHERE t.id_vuelo = v.id_vuelo AND t.nombre_tarifa = 'Classic');
 
--- Económica Premium Flex (no aplica a Wingo ni Satena)
+-- Premium Flex no aplica a Wingo ni Satena
 INSERT INTO tarifa (id_vuelo, clase_cabina, nombre_tarifa, precio_tarifa, equipaje_mano_kg,
                     equipaje_bodega_kg, permite_cambios, reembolsable, cupos_tarifa)
 SELECT v.id_vuelo, 'ECONOMICA_PREMIUM', 'Premium Flex', round(v.precio_base * 1.75 / 1000) * 1000, 12, 23, TRUE, TRUE,
@@ -160,7 +157,7 @@ FROM vuelo v
 WHERE v.id_aerolinea IN ('AER-001', 'AER-002', 'AER-005')
   AND NOT EXISTS (SELECT 1 FROM tarifa t WHERE t.id_vuelo = v.id_vuelo AND t.nombre_tarifa = 'Premium Flex');
 
--- Ejecutiva (solo Avianca y LATAM)
+-- Ejecutiva solo en Avianca y LATAM
 INSERT INTO tarifa (id_vuelo, clase_cabina, nombre_tarifa, precio_tarifa, equipaje_mano_kg,
                     equipaje_bodega_kg, permite_cambios, reembolsable, cupos_tarifa)
 SELECT v.id_vuelo, 'EJECUTIVA', 'Business', round(v.precio_base * 2.9 / 1000) * 1000, 15, 32, TRUE, TRUE,
@@ -169,7 +166,6 @@ FROM vuelo v
 WHERE v.id_aerolinea IN ('AER-001', 'AER-002')
   AND NOT EXISTS (SELECT 1 FROM tarifa t WHERE t.id_vuelo = v.id_vuelo AND t.nombre_tarifa = 'Business');
 
--- Resumen
 SELECT (SELECT COUNT(*) FROM vuelo)          AS vuelos,
        (SELECT COUNT(*) FROM segmento_vuelo) AS segmentos,
        (SELECT COUNT(*) FROM tarifa)         AS tarifas;

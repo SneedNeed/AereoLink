@@ -1,5 +1,4 @@
 'use strict';
-// Panel de administración: resumen, vuelos, reservas, clientes y aerolíneas.
 const { query, tx } = require('./db');
 const { HttpError, bad } = require('./util');
 const { texto, fechaValida } = require('./validators');
@@ -15,7 +14,6 @@ const vacioANull = (v) => {
     return t === '' ? null : t;
 };
 
-// ------------------------------------------------------------------ resumen
 async function resumen() {
     await expirarPendientes();
     const { rows: [g] } = await query(
@@ -52,7 +50,6 @@ async function resumen() {
     return { ...g, rutas_top: rutas, aerolineas_top: aerolineas };
 }
 
-// ------------------------------------------------------------------ vuelos
 async function listarVuelos(p) {
     const origen = /^[A-Za-z]{3}$/.test(p.origen || '') ? p.origen.toUpperCase() : null;
     const destino = /^[A-Za-z]{3}$/.test(p.destino || '') ? p.destino.toUpperCase() : null;
@@ -139,7 +136,6 @@ async function crearVuelo(body) {
             [codigo, idAerolinea, origen, destino, salida, llegada, escalas, capacidad, precio]
         );
         if (escalas === 0) {
-            // Los vuelos directos tienen un único segmento (igual que los de los datos de demostración).
             await c.query(
                 `INSERT INTO segmento_vuelo (id_vuelo, orden_segmento, aeropuerto_salida, aeropuerto_llegada, fecha_salida_seg, fecha_llegada_seg, tiempo_escala_min)
                  VALUES ($1, 1, $2, $3, $4::timestamp, $5::timestamp, 0)`,
@@ -169,7 +165,7 @@ async function cambiarEstadoVuelo(id, estado) {
     if (!r.rowCount) throw new HttpError(404, 'No encontramos ese vuelo.');
     let canceladas = 0;
     if (estado === 'CANCELADO') {
-        // Si el vuelo se cancela, también se cancelan (y liberan) las reservas que lo incluyen.
+        // al cancelar el vuelo se cancelan sus reservas
         const { rows } = await query(
             `SELECT DISTINCT d.id_reserva
                FROM detalle_reserva d
@@ -197,7 +193,6 @@ async function eliminarVuelo(id) {
     return { ok: true };
 }
 
-// ------------------------------------------------------------------ reservas
 async function listarReservasAdmin(p) {
     const estado = ESTADOS_RESERVA.includes(p.estado) ? p.estado : null;
     const q = vacioANull(p.q);
@@ -215,7 +210,6 @@ async function listarReservasAdmin(p) {
     return rows.map((r) => detalle.find((d) => d.id_reserva === r.id_reserva)).filter(Boolean);
 }
 
-// ------------------------------------------------------------------ clientes
 async function listarClientes(p) {
     const q = vacioANull(p.q);
     const { rows } = await query(
@@ -238,7 +232,6 @@ async function cambiarEstadoCliente(id, estado) {
     return { ok: true };
 }
 
-// ------------------------------------------------------------------ aerolíneas
 async function listarAerolineas() {
     const { rows } = await query(
         `SELECT a.id_aerolinea, a.codigo_iata, a.nombre, a.pais_origen, a.estado,

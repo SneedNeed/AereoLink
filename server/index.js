@@ -1,6 +1,4 @@
 'use strict';
-// Servidor web de AereoLink: sirve las páginas de /public y la API de /api.
-// Solo necesita la librería "pg" (el resto es Node puro).
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -40,7 +38,6 @@ function servirArchivo(req, res, pathname) {
         res.writeHead(403);
         return res.end('Acceso denegado');
     }
-    // /perfil → /perfil.html
     if (!path.extname(archivo) && fs.existsSync(archivo + '.html')) archivo += '.html';
 
     fs.stat(archivo, (err, st) => {
@@ -85,6 +82,8 @@ async function iniciar() {
     try {
         const { rows } = await db.query('SELECT current_database() AS bd, version() AS version');
         console.log(`✔ Conectado a PostgreSQL (base de datos "${rows[0].bd}")`);
+        await db.query(fs.readFileSync(path.join(__dirname, '..', 'database', 'plpgsql.sql'), 'utf8'));
+        console.log('✔ Procedimientos PL/pgSQL listos');
         const { rows: [n] } = await db.query('SELECT COUNT(*)::int AS vuelos FROM vuelo');
         if (!n.vuelos) console.log('⚠ No hay vuelos cargados. Ejecuta: npm run db:demo   (o crea vuelos desde el panel de administración)');
     } catch (err) {
@@ -92,7 +91,6 @@ async function iniciar() {
         console.error('  Revisa los datos de conexión en el archivo .env y que hayas creado las tablas (npm run db:init).');
     }
     servidor.listen(config.port, () => console.log(`✔ AereoLink listo en http://localhost:${config.port}`));
-    // Libera los cupos de las reservas que no se pagaron a tiempo.
     setInterval(() => expirarPendientes().catch((e) => console.error('[expirar]', e.message)), 60 * 1000).unref();
 }
 

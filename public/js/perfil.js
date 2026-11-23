@@ -1,5 +1,4 @@
 'use strict';
-// Perfil del cliente: datos de contacto, cambio de contraseña, pasajeros guardados y búsquedas recientes.
 (async function () {
     const $ = (id) => document.getElementById(id);
     const contenido = $('contenido');
@@ -140,7 +139,6 @@
     }
     pintar();
 
-    // Ojo para mostrar / ocultar contraseñas
     contenido.addEventListener('click', (e) => {
         const b = e.target.closest('.password-toggle');
         if (!b) return;
@@ -173,7 +171,7 @@
                 perfil = await AL.api('/cliente/perfil', { method: 'PUT', body: datos });
                 pintar();
                 AL.aviso('Tus datos fueron actualizados.', 'exito');
-                AL.iniciarPagina({ requiere: 'cliente' }); // refresca el nombre del encabezado
+                AL.iniciarPagina({ requiere: 'cliente' });
             } catch (err) {
                 AL.mostrarErrorApi(form, err);
                 AL.cargando(boton, false);

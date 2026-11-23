@@ -1,10 +1,8 @@
 'use strict';
-// Resultados de vuelos: filtros, orden, elección de ida y vuelta, y resumen antes de reservar.
 (async function () {
     const $ = (id) => document.getElementById(id);
     AL.iniciarPagina();
 
-    // ------------------------------------------------------------------ parámetros de la búsqueda
     const P = AL.params();
     const busqueda = {
         origen: (P.get('origen') || '').toUpperCase(),
@@ -37,7 +35,6 @@
     try { aeropuertos = await AL.mapaAeropuertos(); } catch (_) { /* se muestran los códigos */ }
     const ciudad = (codigo) => (aeropuertos[codigo] ? aeropuertos[codigo].ciudad : codigo);
 
-    // ------------------------------------------------------------------ estado
     const FRANJAS = [
         { id: 'madrugada', texto: 'Madrugada (00:00 – 05:59)', desde: 0, hasta: 6 },
         { id: 'manana', texto: 'Mañana (06:00 – 11:59)', desde: 6, hasta: 12 },
@@ -45,9 +42,9 @@
         { id: 'noche', texto: 'Noche (18:00 – 23:59)', desde: 18, hasta: 24 },
     ];
     const estado = {
-        etapa: 'ida', // 'ida' | 'vuelta' | 'resumen'
+        etapa: 'ida',
         fechas: { ida: busqueda.ida, vuelta: busqueda.vuelta },
-        elegido: { ida: null, vuelta: null }, // { vuelo, tarifa }
+        elegido: { ida: null, vuelta: null },
         vuelos: [],
         filtros: { escalas: 'todos', aerolineas: new Set(), franjas: new Set(), precioMax: Infinity },
         precioTope: 0,
@@ -60,7 +57,6 @@
     const horaDe = (v) => Number(v.salida.slice(11, 13));
     const totalPor = (t) => t.precio * busqueda.total;
 
-    // ------------------------------------------------------------------ utilidades de pantalla
     function estadoVacio(icono, titulo, texto, acciones = '') {
         return `
             <div class="empty-state card">
@@ -102,7 +98,6 @@
             </li>`).join('');
     }
 
-    // Vuelo de ida ya elegido (se muestra arriba mientras se escoge la vuelta)
     function pintarSeleccionPrevia() {
         const cont = $('seleccionPrevia');
         if (estado.etapa !== 'vuelta' || !estado.elegido.ida) {
@@ -120,7 +115,6 @@
             </div>`;
     }
 
-    // ------------------------------------------------------------------ cargar vuelos de la etapa actual
     async function cargarVuelos() {
         const esIda = estado.etapa === 'ida';
         const q = new URLSearchParams({
@@ -131,7 +125,7 @@
         });
         if (!esIda) q.set('despues', estado.elegido.ida.vuelo.llegada);
         if (esIda && estado.primeraBusqueda) {
-            q.set('registrar', '1'); // guarda la búsqueda en historial_busqueda (una sola vez)
+            q.set('registrar', '1');
             if (idaVuelta) q.set('regreso', busqueda.vuelta);
         }
         estado.primeraBusqueda = false;
@@ -154,7 +148,6 @@
         pintarLista();
     }
 
-    // ------------------------------------------------------------------ navegación por día
     function limiteMinimo() {
         return estado.etapa === 'vuelta' ? estado.elegido.ida.vuelo.llegada.slice(0, 10) : hoy;
     }
@@ -181,7 +174,6 @@
     $('diaSiguiente').addEventListener('click', () => cambiarDia(AL.sumarDias(estado.fechas[estado.etapa], 1)));
     $('cambiarFecha').addEventListener('change', (e) => cambiarDia(e.target.value));
 
-    // ------------------------------------------------------------------ filtros
     function reiniciarFiltros() {
         const precios = estado.vuelos.map(precioDesde);
         estado.precioTope = precios.length ? Math.ceil(Math.max(...precios) / 1000) * 1000 : 0;
@@ -278,7 +270,6 @@
         return lista.sort(orden[estado.orden]);
     }
 
-    // ------------------------------------------------------------------ tarjetas de vuelo
     const CARACTERISTICAS = (t) => [
         [true, `Equipaje de mano ${t.equipaje_mano_kg} kg`],
         [t.equipaje_bodega_kg > 0, t.equipaje_bodega_kg > 0 ? `Equipaje de bodega ${t.equipaje_bodega_kg} kg` : 'Sin equipaje de bodega'],
@@ -395,7 +386,6 @@
         }).join('');
     }
 
-    // ------------------------------------------------------------------ elegir tarifa y avanzar
     function elegir(idVuelo, idTarifa) {
         const vuelo = estado.vuelos.find((v) => v.id_vuelo === idVuelo);
         const tarifa = vuelo && vuelo.tarifas.find((t) => t.id_tarifa === idTarifa);
@@ -406,7 +396,7 @@
             estado.elegido.vuelta = null;
             if (idaVuelta) {
                 estado.etapa = 'vuelta';
-                // la vuelta nunca puede ser antes de que llegue el vuelo de ida
+                // la vuelta no puede salir antes de la llegada de la ida
                 const dia = vuelo.llegada.slice(0, 10);
                 if (estado.fechas.vuelta < dia) estado.fechas.vuelta = dia;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -477,7 +467,6 @@
         cargarVuelos();
     }
 
-    // ------------------------------------------------------------------ eventos de la página
     document.querySelector('.page-container').addEventListener('click', (e) => {
         const b = e.target.closest('[data-accion]');
         if (!b) return;
@@ -501,7 +490,6 @@
         }
     });
 
-    // En pantallas grandes los filtros arrancan abiertos
     if (window.matchMedia('(min-width: 900px)').matches) $('filtros').open = true;
 
     cargarVuelos();

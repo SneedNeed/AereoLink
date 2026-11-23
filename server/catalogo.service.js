@@ -1,12 +1,10 @@
 'use strict';
-// Catálogo público: aeropuertos, búsqueda de vuelos y consulta de tarifas.
 const { query } = require('./db');
 const { TS, AHORA_LOCAL } = require('./reservas.service');
 const { bad } = require('./util');
 const { fechaValida, hoy } = require('./validators');
 const { ciudadVisible } = require('./ciudades');
 
-// Fragmentos SQL reutilizados
 const SEGMENTOS_JSON = `COALESCE((
     SELECT json_agg(json_build_object(
                'orden', s.orden_segmento,
@@ -48,11 +46,6 @@ async function listarAeropuertos() {
     }));
 }
 
-/**
- * Busca vuelos de un día entre dos aeropuertos con cupos para N pasajeros.
- * - despues: (opcional) solo vuelos que salgan después de esa fecha/hora (para el vuelo de regreso).
- * - registrar: guarda la búsqueda en historial_busqueda.
- */
 async function buscarVuelos(p, idCliente) {
     const origen = String(p.origen || '').toUpperCase();
     const destino = String(p.destino || '').toUpperCase();
@@ -107,7 +100,6 @@ async function buscarVuelos(p, idCliente) {
     return rows.map(conCiudades);
 }
 
-/** Datos de las tarifas elegidas (con su vuelo), en el mismo orden en que se piden. */
 async function tarifasPorIds(ids) {
     const lista = [...new Set(ids)].filter((n) => Number.isInteger(n) && n > 0).slice(0, 2);
     if (!lista.length) throw bad('Indica las tarifas que quieres consultar.');

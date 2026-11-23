@@ -1,11 +1,4 @@
 'use strict';
-// Crea la base de datos (si no existe), las tablas y los datos de demostración.
-//
-//   npm run db:init     → crea las tablas (Proyecto_Aerolink.sql) y carga los vuelos de demostración
-//   npm run db:demo     → solo agrega/renueva los vuelos de demostración (no borra nada)
-//
-// ¡Ojo! db:init BORRA y vuelve a crear las tablas. Si ya hay clientes registrados pide confirmación
-// con la opción --forzar:   npm run db:init -- --forzar
 const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
@@ -34,7 +27,7 @@ async function conectar() {
         await cliente.connect();
         return cliente;
     } catch (err) {
-        if (err.code !== '3D000') throw err; // 3D000 = la base de datos no existe
+        if (err.code !== '3D000') throw err; // 3D000: la base no existe
         const nombre = nombreBd();
         console.log(`La base de datos "${nombre}" no existe. Creándola...`);
         const admin = new Client(configAdmin());
@@ -69,7 +62,7 @@ async function main() {
                     return;
                 }
             }
-            // El script SQL no borra la tabla administrador; se limpia aquí para poder repetir la instalación.
+            // el script no borra la tabla administrador
             await cliente.query('DROP TABLE IF EXISTS administrador CASCADE');
             await ejecutarArchivo(cliente, 'Proyecto_Aerolink.sql');
         }

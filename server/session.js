@@ -1,5 +1,4 @@
 'use strict';
-// Sesiones firmadas en una cookie HttpOnly (sin librerías externas).
 const crypto = require('crypto');
 const config = require('./config');
 const { parseCookies, safeEqual } = require('./util');
@@ -9,7 +8,6 @@ const COOKIE = 'al_session';
 const b64 = (s) => Buffer.from(s).toString('base64url');
 const firmar = (texto) => crypto.createHmac('sha256', config.sessionSecret).update(texto).digest('base64url');
 
-/** payload: { rol: 'cliente' | 'admin', id?, correo? } */
 function crearToken(payload, segundos) {
     const cuerpo = b64(JSON.stringify({ ...payload, exp: Math.floor(Date.now() / 1000) + segundos }));
     return `${cuerpo}.${firmar(cuerpo)}`;
@@ -32,7 +30,6 @@ function leerSesion(req) {
     return leerToken(parseCookies(req)[COOKIE]);
 }
 
-/** recordar = true → cookie de 30 días; false → cookie de sesión (12 horas). */
 function iniciarSesion(res, payload, recordar) {
     const segundos = recordar ? 30 * 24 * 3600 : 12 * 3600;
     const token = crearToken(payload, segundos);

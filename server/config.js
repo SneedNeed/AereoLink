@@ -1,5 +1,4 @@
 'use strict';
-// Configuración del servidor. Lee el archivo .env (si existe) sin necesitar librerías extra.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -35,7 +34,7 @@ const db = env.DATABASE_URL
 module.exports = {
     port: Number(env.PORT || 3000),
     db,
-    // Si no defines SESSION_SECRET se genera uno al arrancar (las sesiones se cierran al reiniciar).
+    // sin SESSION_SECRET las sesiones se pierden al reiniciar
     sessionSecret: env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     cookieSecure: env.COOKIE_SECURE === 'true',
     minutosParaPagar: Number(env.MINUTOS_PARA_PAGAR || 30),

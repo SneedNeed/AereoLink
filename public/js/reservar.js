@@ -1,5 +1,4 @@
 'use strict';
-// Reserva: datos de cada pasajero + resumen del viaje. Al confirmar se crea la reserva (queda PENDIENTE de pago).
 (async function () {
     const $ = (id) => document.getElementById(id);
     const contenido = $('contenido');
@@ -17,7 +16,6 @@
             </div>`;
     }
 
-    // ------------------------------------------------------------------ selección hecha en la página de resultados
     const sel = AL.leerSeleccion();
     if (!sel || !Array.isArray(sel.tarifas) || !sel.tarifas.length) {
         return mostrarProblema('fa-ticket', 'Aún no has elegido un vuelo', 'Busca tu vuelo, elige una tarifa y vuelve aquí para completar la reserva.');
@@ -46,13 +44,12 @@
         return mostrarProblema('fa-users-slash', 'Ya no quedan cupos suficientes', `En el vuelo ${sinCupos.origen} → ${sinCupos.destino} no hay lugar para ${n} pasajeros. Busca de nuevo para elegir otra opción.`);
     }
 
-    const fechaRef = tarifas[0].salida.slice(0, 10); // las edades se evalúan el día del primer vuelo
+    const fechaRef = tarifas[0].salida.slice(0, 10); // la edad se calcula al día del primer vuelo
     const minBodega = Math.min(...tarifas.map((t) => t.equipaje_bodega_kg));
     const total = tarifas.reduce((s, t) => s + t.precio * n, 0);
-    const adultoMax = AL.hace18(fechaRef); // fecha de nacimiento máxima para ser adulto ese día
-    const menorMin = AL.sumarDias(adultoMax, 1); // fecha de nacimiento mínima para ser menor ese día
+    const adultoMax = AL.hace18(fechaRef);
+    const menorMin = AL.sumarDias(adultoMax, 1);
 
-    // ------------------------------------------------------------------ plantillas
     const pintarTramo = (t, i) => `
         <div class="summary-flight">
             <p class="summary-flight-title">${tarifas.length > 1 ? (i === 0 ? 'Ida' : 'Vuelta') + ' · ' : ''}${AL.fechaCorta(t.salida)}</p>
@@ -163,7 +160,6 @@
     const form = $('formPasajeros');
     const tarjetas = [...form.querySelectorAll('.passenger-card')];
 
-    // ------------------------------------------------------------------ rellenar datos
     const campo = (card, nombre) => card.querySelector(`[name="${nombre}"]`);
 
     function bloquearDatos(card, bloquear) {
@@ -206,7 +202,6 @@
         }
     });
 
-    // Quitar el error de un campo apenas se corrige
     form.addEventListener('input', (e) => {
         const cont = e.target.closest('.field-container');
         if (!cont) return;
@@ -215,7 +210,6 @@
         if (p) p.textContent = '';
     });
 
-    // ------------------------------------------------------------------ validar y enviar
     const RE_NOMBRE = /^[\p{L}][\p{L}\p{M}\s'.-]*$/u;
 
     function validarTarjeta(card) {

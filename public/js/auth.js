@@ -1,13 +1,11 @@
 'use strict';
-// Inicio de sesión y registro (una sola página, dos formularios).
 (async function () {
     const loginTab = document.querySelector('.login-tab');
     const registerTab = document.querySelector('.register-tab');
     const loginForm = document.getElementById('formLogin');
     const registerForm = document.getElementById('formRegistro');
 
-    // ------------------------------------------------------------------ a dónde ir después de entrar
-    // Solo se aceptan destinos de este mismo sitio (nada de https://otro-sitio).
+    // solo rutas del mismo sitio
     const P = AL.params();
     const siguiente = (() => {
         const n = P.get('next') || '';
@@ -18,7 +16,6 @@
     const s = await AL.iniciarPagina();
     if (s && s.autenticado) return irDespues(s.rol);
 
-    // ------------------------------------------------------------------ alternar entre ingreso y registro
     function cambiarFormulario(destino) {
         const verLogin = destino === 'login';
         loginTab.classList.toggle('active', verLogin);
@@ -35,7 +32,6 @@
 
     if (siguiente) AL.alerta(loginForm, 'Inicia sesión para continuar con tu reserva.', 'info');
 
-    // ------------------------------------------------------------------ ojito de las contraseñas
     document.querySelectorAll('.password-toggle').forEach((btn) => {
         btn.addEventListener('click', () => {
             const input = btn.parentElement.querySelector('input');
@@ -47,7 +43,6 @@
         });
     });
 
-    // Al escribir se quita el error de ese campo
     document.querySelectorAll('.field-input').forEach((input) => {
         input.addEventListener('input', () => {
             const cont = input.closest('.field-container');
@@ -57,12 +52,10 @@
         });
     });
 
-    // La fecha de nacimiento debe permitir ser mayor de 18 años
     const nacimiento = document.getElementById('regNacimiento');
     nacimiento.max = AL.hace18(AL.hoy());
     nacimiento.min = '1900-01-01';
 
-    // ------------------------------------------------------------------ validaciones del lado del cliente
     const valor = (form, nombre) => form.querySelector(`[name="${nombre}"]`).value.trim();
 
     function validarLogin() {
@@ -106,7 +99,6 @@
         if (primero) primero.focus();
     }
 
-    // ------------------------------------------------------------------ enviar
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errores = validarLogin();
@@ -153,14 +145,13 @@
                     confirmacion: f.querySelector('[name="confirmacion"]').value,
                 },
             });
-            irDespues('cliente'); // el registro ya deja la sesión iniciada
+            irDespues('cliente');
         } catch (err) {
             AL.mostrarErrorApi(registerForm, err);
             AL.cargando(boton, false);
         }
     });
 
-    // ------------------------------------------------------------------ textos informativos
     document.getElementById('olvidoContrasena').addEventListener('click', () => {
         AL.informar('Recuperar tu contraseña', 'Por ahora el restablecimiento se hace con nuestro equipo de soporte. Llama al 123 4567 89 con tu documento de identidad a la mano.');
     });

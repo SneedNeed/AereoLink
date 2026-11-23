@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
 
-/* ==========================================================
-   AereoLink — estilos
-   Paleta azul elegante, inspirada en buscadores tipo Despegar
-   ========================================================== */
-
 :root {
     --navy-900: #061733;
     --navy-800: #0a2552;
@@ -50,11 +45,6 @@ h1, h2, p {
 button, input, select {
     font-family: inherit;
 }
-
-
-/* ==========================================================
-   HEADER
-   ========================================================== */
 
 .header {
     position: sticky;
@@ -128,8 +118,6 @@ button, input, select {
     font-size: 18px;
     color: var(--white);
 }
-
-/* ---------- Menú de perfil ---------- */
 
 .profile-menu {
     position: absolute;
@@ -208,11 +196,6 @@ button, input, select {
     color: var(--ink);
 }
 
-
-/* ==========================================================
-   MAIN / HERO
-   ========================================================== */
-
 .main {
     min-height: calc(100vh - var(--header-h));
     padding: 56px 24px 80px;
@@ -251,19 +234,12 @@ button, input, select {
     color: var(--navy-800);
 }
 
-
-/* ==========================================================
-   BUSCADOR
-   ========================================================== */
-
 .flySearcher {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto auto;
     gap: 12px;
     align-items: stretch;
 }
-
-/* ---------- Tipo de vuelo ---------- */
 
 .flyOption {
     grid-column: 1 / -1;
@@ -293,8 +269,6 @@ button, input, select {
     border-color: var(--blue-500);
     box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
 }
-
-/* ---------- Origen / Destino ---------- */
 
 .trayectSearcher {
     display: flex;
@@ -348,8 +322,6 @@ button, input, select {
     box-shadow: 0 0 0 3px rgba(34, 114, 234, 0.18);
 }
 
-/* ---------- Etiquetas flotantes ---------- */
-
 .label {
     letter-spacing: 0.1px;
 }
@@ -376,9 +348,6 @@ button, input, select {
     left: 32px;
 }
 
-/* Etiqueta arriba cuando el campo está enfocado, o cuando tiene valor.
-   Para "tiene valor": agrega la clase .is-filled al contenedor desde JS
-   (ver ejemplo en el mensaje). */
 .trayect-child-container:focus-within .trayect-label,
 .trayect-child-container.is-filled .trayect-label {
     top: 10px;
@@ -390,19 +359,6 @@ button, input, select {
 .trayect-child-container:focus-within .trayect-label {
     color: var(--blue-600);
 }
-
-/* ALTERNATIVA sin JS: si le pones placeholder=" " a los inputs,
-   descomenta esto y puedes quitar la clase .is-filled:
-
-.trayect-input:not(:placeholder-shown) + .trayect-label {
-    top: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    transform: translateY(0);
-}
-*/
-
-/* ---------- Botón de intercambio ---------- */
 
 .swapButton {
     position: relative;
@@ -431,8 +387,6 @@ button, input, select {
     border-color: var(--blue-600);
     transform: rotate(180deg);
 }
-
-/* ---------- Fechas ---------- */
 
 .dateSearcher {
     display: flex;
@@ -474,7 +428,6 @@ button, input, select {
     height: 100%;
 }
 
-/* Solo ida: se oculta la fecha de vuelta */
 .dateSearcher.one-way .goDate-container:last-child {
     display: none;
 }
@@ -526,8 +479,6 @@ button, input, select {
     opacity: 1;
 }
 
-/* ---------- Pasajeros ---------- */
-
 .people-chooser {
     position: relative;
     display: flex;
@@ -564,7 +515,6 @@ button, input, select {
     color: var(--ink);
 }
 
-/* flechita */
 .people-chooser::after {
     content: "";
     width: 7px;
@@ -728,8 +678,6 @@ button, input, select {
     transform: scale(0.98);
 }
 
-/* ---------- Botón Buscar ---------- */
-
 .search-button {
     display: flex;
     align-items: center;
@@ -762,11 +710,6 @@ button, input, select {
 .search-button i {
     font-size: 16px;
 }
-
-
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
 
 @media (max-width: 1100px) {
     .flySearcher {

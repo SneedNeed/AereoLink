@@ -5,12 +5,8 @@ cd /d "%~dp0"
 
 if not exist "package.json" goto sin_carpeta
 
-rem ============================================================
-rem  CAMINO RAPIDO: si todo ya esta instalado, solo enciende.
-rem  (instalado.flag lo crea este mismo archivo al terminar la instalacion)
-rem ============================================================
 if not exist "instalado.flag" goto instalar
-rem  Si pasaron 30 dias o mas, renueva los vuelos de demostracion (no borra nada).
+rem renueva los vuelos si pasaron 30 dias
 forfiles /m "instalado.flag" /d -30 >nul 2>&1
 if errorlevel 1 goto servidor
 echo.
@@ -19,9 +15,6 @@ call npm run db:demo
 echo ok> "instalado.flag"
 goto servidor
 
-rem ============================================================
-rem  INSTALACION (solo la primera vez)
-rem ============================================================
 :instalar
 echo.
 echo  ==========================================
@@ -54,7 +47,7 @@ set "DBPW="
 :base
 echo.
 echo  [3/4] Revisando la base de datos...
-rem  Codigos: 0 = tablas ya existen, 1 = faltan, 3 = contrasena mala, 4 = PostgreSQL apagado
+rem 0 = ok, 1 = faltan tablas, 3 = clave mala, 4 = postgres apagado
 node -e "const {Client}=require('pg');const c=new Client(require('./server/config').db);c.connect().then(()=>c.query('SELECT 1 FROM cliente LIMIT 1')).then(()=>process.exit(0)).catch(e=>{const k=e.code||(e.errors&&e.errors[0]&&e.errors[0].code);process.exit(k==='28P01'?3:(k==='ECONNREFUSED'||k==='ETIMEDOUT')?4:1)})"
 set "ESTADO=%errorlevel%"
 if "%ESTADO%"=="0" goto listo
@@ -77,9 +70,6 @@ echo  La contrasena de PostgreSQL no es correcta. Vamos a escribirla de nuevo.
 del /q ".env" >nul 2>&1
 goto pedir_clave
 
-rem ============================================================
-rem  SERVIDOR
-rem ============================================================
 :servidor
 set "PUERTO=3000"
 if exist ".env" for /f "tokens=2 delims==" %%a in ('findstr /b /c:"PORT=" ".env"') do set "PUERTO=%%a"
@@ -100,9 +90,6 @@ echo  El servidor se detuvo.
 pause
 exit /b 0
 
-rem ============================================================
-rem  ERRORES
-rem ============================================================
 :sin_carpeta
 echo  Este archivo debe estar DENTRO de la carpeta aerolink, junto a package.json.
 goto fin_error

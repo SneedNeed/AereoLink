@@ -1,10 +1,5 @@
 'use strict';
-/*
- * AereoLink — funciones comunes a todas las páginas.
- * Se carga primero y deja todo disponible en el objeto global `AL`.
- */
 (function () {
-    // ================================================================ texto y formato
     const esc = (v) =>
         String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -14,7 +9,6 @@
     const pad = (n) => String(n).padStart(2, '0');
     const aISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-    /** 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SS' → Date (hora local, sin conversiones de zona). */
     function aFecha(s) {
         const t = String(s);
         const [a, m, d] = t.slice(0, 10).split('-').map(Number);
@@ -27,7 +21,6 @@
         d.setDate(d.getDate() + n);
         return aISO(d);
     };
-    /** Resta 18 años a una fecha (para calcular la fecha máxima de nacimiento de un adulto). */
     const hace18 = (ref) => {
         const [y, m, d] = ref.split('-');
         return `${Number(y) - 18}-${m}-${d}`;
@@ -75,7 +68,6 @@
 
     const params = () => new URLSearchParams(location.search);
 
-    // ================================================================ API
     class ApiError extends Error {
         constructor(mensaje, status, campos) {
             super(mensaje);
@@ -84,7 +76,6 @@
         }
     }
 
-    /** Llama a la API (/api + ruta). Lanza ApiError con el mensaje que envía el servidor. */
     async function api(ruta, { method = 'GET', body } = {}) {
         const opciones = { method, headers: {}, credentials: 'same-origin' };
         if (body !== undefined) {
@@ -105,7 +96,6 @@
         return data;
     }
 
-    // ================================================================ avisos y diálogos
     function aviso(mensaje, tipo = 'info', ms = 4500) {
         let caja = document.getElementById('avisos');
         if (!caja) {
@@ -126,7 +116,6 @@
         }, ms);
     }
 
-    /** Ventana de confirmación. Devuelve una promesa con true (aceptó) o false. */
     function confirmar({ titulo, mensaje, textoConfirmar = 'Confirmar', textoCancelar = 'Volver', peligro = false }) {
         return new Promise((resolve) => {
             const dlg = document.createElement('dialog');
@@ -150,19 +139,16 @@
         });
     }
 
-    /** Ventana informativa con un solo botón. */
     function informar(titulo, mensaje) {
         return confirmar({ titulo, mensaje, textoConfirmar: 'Entendido', textoCancelar: 'Cerrar' });
     }
 
-    /** Pone un botón en estado "cargando" (evita doble clic). */
     function cargando(boton, activo) {
         if (!boton) return;
         boton.disabled = activo;
         boton.classList.toggle('is-loading', activo);
     }
 
-    // ================================================================ formularios (errores por campo)
     function limpiarErrores(form) {
         form.querySelectorAll('.has-error').forEach((e) => e.classList.remove('has-error'));
         form.querySelectorAll('.field-error').forEach((p) => (p.textContent = ''));
@@ -186,7 +172,6 @@
         a.hidden = false;
         a.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    /** Muestra un error del servidor: marca los campos que indique y deja el mensaje general arriba. */
     function mostrarErrorApi(form, err) {
         limpiarErrores(form);
         let sinCampo = false;
@@ -202,7 +187,6 @@
         }
     }
 
-    // ================================================================ sesión y encabezado
     const CLAVE_SESION = 'al_sesion';
     const CLAVE_SELECCION = 'al_seleccion';
 
@@ -298,7 +282,6 @@
                 cerrarSesion();
                 return;
             }
-            // En pantallas táctiles el menú de perfil se abre con un toque
             const perfil = e.target.closest('.profile-option');
             if (perfil && !e.target.closest('.profile-menu')) perfil.classList.toggle('open');
         });
@@ -307,11 +290,6 @@
         });
     }
 
-    /**
-     * Arranque de cada página: pinta el encabezado y, si la página exige sesión,
-     * redirige al acceso. Devuelve el estado de la sesión (o null si redirigió).
-     *   requiere: 'cliente' | 'admin' | null
-     */
     async function iniciarPagina({ requiere = null } = {}) {
         activarMenuHeader();
         montarHeader(leerCache() || { autenticado: false });
@@ -331,7 +309,6 @@
         return s;
     }
 
-    // ================================================================ aeropuertos y selección de vuelos
     let _aeropuertos = null;
     function aeropuertos() {
         if (!_aeropuertos) {
@@ -342,7 +319,6 @@
         }
         return _aeropuertos;
     }
-    /** Devuelve un objeto { BOG: {codigo, ciudad, nombre...}, ... }. */
     async function mapaAeropuertos() {
         const lista = await aeropuertos();
         return Object.fromEntries(lista.map((a) => [a.codigo, a]));

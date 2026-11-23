@@ -1,5 +1,4 @@
 'use strict';
-// Historial de reservas del cliente: filtrar, ver detalle, pagar pendientes y cancelar.
 (async function () {
     const $ = (id) => document.getElementById(id);
     const lista = $('lista');
@@ -9,11 +8,11 @@
 
     let reservas = [];
     let filtro = 'todas';
-    const abiertas = new Set(); // reservas con el detalle desplegado
+    const abiertas = new Set();
 
     const coincide = (r, f) => f === 'todas' || r.estado === f || (f === 'cerradas' && ['CANCELADA', 'EXPIRADA'].includes(r.estado));
     const yaSalio = (r) => r.vuelos.some((v) => v.salida <= nowLocal());
-    // Hora local de Bogotá como texto comparable con las fechas del servidor
+    // hora de Bogotá como texto comparable con las del servidor
     const nowLocal = () => {
         const p = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Bogota', dateStyle: 'short', timeStyle: 'medium' }).format(new Date());
         return p.replace(' ', 'T');

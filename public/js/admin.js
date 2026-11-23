@@ -1,5 +1,4 @@
 'use strict';
-// Panel de administración: resumen, vuelos, reservas, clientes y aerolíneas.
 (async function () {
     const $ = (id) => document.getElementById(id);
 
@@ -20,7 +19,6 @@
     const falla = (tabla, err) => { tabla.innerHTML = vacio(err.message); };
     const opciones = (mapa, actual) => Object.entries(mapa).map(([k, t]) => `<option value="${k}" ${k === actual ? 'selected' : ''}>${t}</option>`).join('');
 
-    // ------------------------------------------------------------------ pestañas
     const cargadores = { resumen: cargarResumen, vuelos: cargarVuelos, reservas: cargarReservas, clientes: cargarClientes, aerolineas: cargarAerolineas };
 
     function abrirTab(nombre) {
@@ -37,7 +35,6 @@
         if (b) abrirTab(b.dataset.tab);
     });
 
-    // ------------------------------------------------------------------ resumen
     async function cargarResumen() {
         try {
             const r = await AL.api('/admin/resumen');
@@ -62,13 +59,11 @@
         }
     }
 
-    // ------------------------------------------------------------------ catálogos usados en varios sitios
     async function cargarCatalogos() {
         if (aerolineas.length && aeropuertos.length) return;
         [aerolineas, aeropuertos] = await Promise.all([AL.api('/admin/aerolineas'), AL.aeropuertos()]);
     }
 
-    // ------------------------------------------------------------------ vuelos
     async function cargarVuelos() {
         const tabla = $('tablaVuelos');
         cargandoTabla(tabla);
@@ -169,7 +164,6 @@
         } catch (err) { AL.aviso(err.message, 'error'); }
     });
 
-    // ---- nuevo vuelo
     const dlgVuelo = $('dlgVuelo');
     const formVuelo = $('formVuelo');
 
@@ -217,7 +211,6 @@
         AL.cargando(boton, false);
     });
 
-    // ------------------------------------------------------------------ reservas
     async function cargarReservas() {
         const tabla = $('tablaReservas');
         cargandoTabla(tabla);
@@ -302,7 +295,6 @@
         }
     });
 
-    // ------------------------------------------------------------------ clientes
     async function cargarClientes() {
         const tabla = $('tablaClientes');
         cargandoTabla(tabla);
@@ -338,7 +330,6 @@
         }
     });
 
-    // ------------------------------------------------------------------ aerolíneas
     async function cargarAerolineas() {
         const tabla = $('tablaAerolineas');
         cargandoTabla(tabla);
@@ -369,7 +360,6 @@
         } catch (err) { AL.aviso(err.message, 'error'); }
     });
 
-    // ------------------------------------------------------------------ inicio
     const inicial = location.hash.replace('#', '');
     abrirTab(cargadores[inicial] ? inicial : 'resumen');
 })();

@@ -1,5 +1,4 @@
 'use strict';
-// Página de inicio: buscador de vuelos (autocompletado de aeropuertos, fechas y pasajeros).
 (async function () {
     const $ = (id) => document.getElementById(id);
     const MAX_PASAJEROS = 9;
@@ -17,7 +16,6 @@
 
     const sesionPromesa = AL.iniciarPagina();
 
-    // ------------------------------------------------------------------ aeropuertos
     let aeropuertos = [];
     try {
         aeropuertos = await AL.aeropuertos();
@@ -35,7 +33,6 @@
         input.closest('.trayect-child-container').classList.add('is-filled');
     }
 
-    /** Autocompletado: filtra por ciudad, código IATA o nombre del aeropuerto. */
     function autocompletar(input, lista, siguiente) {
         const contenedor = input.closest('.trayect-child-container');
         let items = [];
@@ -111,14 +108,13 @@
             else if (e.key === 'Escape') cerrar();
         });
         input.addEventListener('blur', () => {
-            // Si escribió algo y no eligió de la lista, se toma la mejor coincidencia
             setTimeout(() => {
                 if (!input.dataset.codigo && input.value.trim() && items.length) elegirAeropuerto(input, items[0].codigo);
                 else if (!input.dataset.codigo) contenedor.classList.toggle('is-filled', input.value !== '');
                 cerrar();
             }, 120);
         });
-        // mousedown (no click) para que el campo no pierda el foco antes de elegir
+        // mousedown para que el input no pierda el foco antes de elegir
         lista.addEventListener('mousedown', (e) => {
             const li = e.target.closest('.suggestion');
             if (!li) return;
@@ -140,7 +136,6 @@
         }
     });
 
-    // ------------------------------------------------------------------ fechas
     const hoy = AL.hoy();
     fIda.min = fVuelta.min = hoy;
     fIda.max = fVuelta.max = AL.sumarDias(hoy, 365);
@@ -158,7 +153,6 @@
     }
     tipoVuelo.addEventListener('change', aplicarTipoVuelo);
 
-    // ------------------------------------------------------------------ pasajeros
     function leerNumero(input, min, max) {
         const n = parseInt(input.value, 10);
         return Math.min(max, Math.max(min, Number.isNaN(n) ? min : n));
@@ -167,7 +161,7 @@
     function actualizarPasajeros(origen) {
         let adultos = leerNumero(inAdultos, 1, MAX_PASAJEROS);
         let menores = leerNumero(inMenores, 0, MAX_PASAJEROS - 1);
-        // Si se pasa del máximo, se recorta el campo que el usuario NO está tocando
+        // se recorta el campo que no se está editando
         if (adultos + menores > MAX_PASAJEROS) {
             if (origen === 'menores') menores = MAX_PASAJEROS - adultos;
             else adultos = MAX_PASAJEROS - menores;
@@ -205,7 +199,6 @@
     chooser.querySelector('.peopleChooser-button').addEventListener('click', () => abrirPasajeros(false));
     actualizarPasajeros();
 
-    // ------------------------------------------------------------------ enviar búsqueda
     function mostrarError(msg) {
         errorBox.textContent = msg;
         errorBox.hidden = false;
@@ -232,7 +225,6 @@
         location.href = 'resultados.html?' + q;
     });
 
-    // ------------------------------------------------------------------ precargar desde la URL (?origen=BOG&destino=MDE...)
     const P = AL.params();
     if (P.get('origen')) elegirAeropuerto(inOrigen, P.get('origen').toUpperCase());
     if (P.get('destino')) elegirAeropuerto(inDestino, P.get('destino').toUpperCase());
@@ -249,7 +241,6 @@
     actualizarPasajeros();
     aplicarTipoVuelo();
 
-    // ------------------------------------------------------------------ destinos sugeridos
     const DESTINOS = [
         { codigo: 'CTG', texto: 'Playa y ciudad amurallada', icono: 'fa-umbrella-beach' },
         { codigo: 'ADZ', texto: 'El mar de los siete colores', icono: 'fa-water' },
@@ -280,7 +271,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ------------------------------------------------------------------ búsquedas recientes (solo con sesión de cliente)
     const sesion = await sesionPromesa;
     if (sesion && sesion.autenticado && sesion.rol === 'cliente') {
         try {
